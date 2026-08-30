@@ -5,7 +5,6 @@ import { site } from '@/config/site'
 import { assets } from '@/config/assets'
 import { ease, viewportOnce } from '@/lib/motion'
 import { usePrefersReducedMotion } from '@/lib/hooks'
-import TornEdge from '@/components/paper/TornEdge'
 import ConnectCTA from './ConnectCTA'
 
 /** Slower than the poster's marquee — this one is weather, not a headline. */
@@ -119,7 +118,7 @@ export default function SiteFooter() {
       </div>
 
       {/* The page physically ends. */}
-      <TornEdge side="top" seed={73} roughness={0.76} />
+      {/* <TornEdge side="top" seed={73} roughness={0.76} /> */}
       <div className="on-noir bg-noir px-[max(1.5rem,7vw)] pb-[clamp(1.75rem,4vw,3rem)] pt-[clamp(0.5rem,1.5vw,1rem)]">
         <p
           className="meta m-0 text-white/45"
