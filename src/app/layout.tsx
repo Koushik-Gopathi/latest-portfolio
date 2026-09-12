@@ -15,7 +15,9 @@ export const metadata: Metadata = {
 }
 
 export const viewport: Viewport = {
-  themeColor: '#f3f1eb',
+  // The first thing the visitor sees is the full-bleed red landing, so the
+  // browser chrome is red too — not the old paper stock.
+  themeColor: '#ff0000',
   colorScheme: 'light',
 }
 

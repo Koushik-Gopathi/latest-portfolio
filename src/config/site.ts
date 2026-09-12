@@ -14,16 +14,16 @@ export const site = {
   /** Index of the character in `displayWord` that the face illustration replaces. */
   faceLetterIndex: 5, // P-O-R-T-F-[O]-L-I-O
 
-  eyebrow: 'DESIGNER / ILLUSTRATOR',
+  eyebrow: 'DEVELOPER / DESIGNER',
   year: '2026',
 
-  firstName: 'GIREESH',
+  firstName: 'KOUSHIK',
   /**
    * The signature form the hero reveals as the visitor starts scrolling —
    * deliberately separate from `firstName`, which the introduction, the poster
    * and the contact note all use.
    */
-  signatureName: 'G K REDDY',
+  signatureName: 'KOUSHIK GOPATHI',
   /** Leave empty until a surname is supplied — the black strip adapts either way. */
   lastName: '',
 
@@ -41,7 +41,7 @@ export const site = {
 
   intro: {
     heading: 'HELLO',
-    lede: "Hi, I'm GIREESH.",
+    lede: "Hi, I'm KOUSHIK GOPATHI.",
     paragraphs: [
       'I design digital experiences that are not just beautiful, but meaningful.',
       "I've worked on dashboards, marketplaces, SaaS platforms, and interactive websites that solve real problems and deliver real impact.",

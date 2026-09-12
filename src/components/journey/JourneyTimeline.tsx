@@ -1,45 +1,78 @@
 "use client";
 
 import { useRef, useState, useLayoutEffect } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
+import TiltCard from "@/components/ui/TiltCard";
+import { MaskText } from "@/components/ui/Reveal";
+
+const EASE = [0.16, 1, 0.3, 1] as const;
 
 const journey = [
   {
     phase: "Phase 01",
     year: "1st Year",
-    title: "The Transition",
+    title: "Into Cybersecurity",
     points: [
-      "Shifted from high school theory to core engineering fundamentals.",
-      "Had my first real 'it just clicked' moment — Data Structures made logic feel like a language I could actually speak.",
+      "Joined B.Tech Cybersecurity — shifted from high school theory to core engineering fundamentals.",
+      "Started building a foundation in how systems work, and more importantly, how they break.",
     ],
     quote:
-      "Started my B.Tech journey and discovered a passion for solving logical puzzles, which naturally pulled me into the world of software engineering.",
+      "Started my B.Tech journey in Cybersecurity, discovering a passion for understanding systems from the inside out.",
   },
   {
     phase: "Phase 02",
     year: "2nd Year",
     title: "Building the Foundation",
     points: [
-      "Moved beyond the college syllabus — picked up React, Python, and cloud basics on my own through YouTube and Coursera.",
-      "Shipped my first personal projects: small builds like a weather app and a basic automation script.",
-      "Joined college tech clubs, entered my first 24-hour hackathon, and made early open-source contributions.",
+      "Learned web development and app development, moving beyond the college syllabus on my own.",
+      "Completed the full-stack and PERN stack (PostgreSQL, Express, React, Node.js).",
+      "Built a functional application for college — my first real-world deployed project.",
+      "Joined ACM Amritapuri, stepping into a community of like-minded builders.",
     ],
     quote:
-      "Explored web ecosystems outside the classroom. Built my first full-stack application and discovered the rush of building things that actually run in a browser.",
+      "Went from learning syntax to shipping a full-stack application my college actually uses — and found my people along the way in ACM.",
   },
   {
     phase: "Phase 03",
-    year: "3rd Year / Present",
+    year: "3rd Year / Present (S5)",
     title: "Specialization & Impact",
     points: [
-      "Currently focused on full-stack web development, with a growing interest in scalable systems and DevOps.",
-      "Took on leadership in a technical club and led a 4-person team through a major college project.",
-      "Picked up freelance and open-source work alongside coursework.",
+      "Currently in Semester 5, working under a faculty member on an app development project.",
+      "Active in ACM's technical activities, while exploring Flutter for cross-platform development.",
+      "Mentoring juniors — passing on what I picked up the hard way.",
+      "Next up: React Native for cross-platform mobile, and diving into cloud technologies.",
     ],
     quote:
-      "Currently diving deep into scalable architectures and database optimization. Leading a team of 4 to build our 3rd-year major project using Next.js and MongoDB.",
+      "Currently building an app under faculty guidance, staying involved with ACM, and mentoring juniors — while gearing up to learn React Native and cloud.",
   },
 ];
+
+/** The dot, plus the ring it throws off at the moment it lands. */
+function TimelineNode() {
+  const reduced = useReducedMotion();
+
+  return (
+    <div className="relative h-4 w-4">
+      {!reduced && (
+        <motion.span
+          aria-hidden
+          initial={{ scale: 1, opacity: 0.6 }}
+          whileInView={{ scale: 3.2, opacity: 0 }}
+          viewport={{ once: true, amount: 0.6 }}
+          transition={{ duration: 1.1, delay: 0.25, ease: "easeOut" }}
+          className="absolute inset-0 rounded-full border-2 border-signal"
+        />
+      )}
+      <motion.div
+        initial={reduced ? undefined : { scale: 0 }}
+        whileInView={reduced ? undefined : { scale: 1 }}
+        viewport={{ once: true, amount: 0.6 }}
+        transition={{ duration: 0.45, ease: EASE }}
+        className="relative h-4 w-4 rounded-full bg-signal ring-4 ring-white"
+      />
+    </div>
+  );
+}
 
 export default function MyJourney() {
   const trackRef = useRef<HTMLDivElement>(null);
@@ -106,32 +139,46 @@ export default function MyJourney() {
   }, []);
 
   return (
-    <section className="relative w-full bg-white text-black py-32 px-6 md:px-12">
-      <div className="max-w-4xl mx-auto">
+    <section className="relative w-full overflow-hidden bg-white px-6 py-32 text-black md:px-12">
+      {/* Faint red field behind the spine, so the white page is not empty
+          either side of the cards. */}
+      <div
+        aria-hidden
+        className="fx-dots pointer-events-none absolute inset-0 text-signal/15"
+      />
 
-        <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase mb-24 text-center">
-          My Journey
-        </h2>
+      <div className="relative mx-auto max-w-4xl">
+        <div className="mb-24 text-center">
+          <p className="mb-4 font-mono text-[0.65rem] uppercase tracking-[0.4em] text-signal">
+            2024 — Present
+          </p>
+          <h2 className="flex justify-center text-4xl font-black uppercase tracking-tighter md:text-6xl">
+            <MaskText text="My Journey" />
+          </h2>
+        </div>
 
         <div ref={trackRef} className="relative">
-
           {pathD && (
             <svg
-              className="absolute left-1/2 -translate-x-1/2 pointer-events-none hidden md:block"
+              className="pointer-events-none absolute left-1/2 hidden -translate-x-1/2 md:block"
               style={{ top: svgTop, overflow: "visible" }}
               width="200"
               height={svgHeight}
               viewBox={`0 0 100 ${svgHeight}`}
               preserveAspectRatio="none"
             >
-              <path d={pathD} stroke="#E5E7EB" strokeWidth={2} fill="none" />
+              {/* The unwritten route, then the red ink that follows you down
+                  it. The drawn line glows a little so it still reads where it
+                  crosses a card's shadow. */}
+              <path d={pathD} stroke="#e6dede" strokeWidth={2} fill="none" />
 
               <motion.path
                 d={pathD}
-                stroke="#000000"
-                strokeWidth={2}
+                stroke="#ff0000"
+                strokeWidth={2.5}
                 fill="none"
-                style={{ pathLength }}
+                strokeLinecap="round"
+                style={{ pathLength, filter: "drop-shadow(0 0 6px rgba(255,0,0,0.45))" }}
               />
             </svg>
           )}
@@ -144,7 +191,7 @@ export default function MyJourney() {
               return (
                 <div
                   key={index}
-                  className={`relative flex flex-col md:flex-row items-center ${
+                  className={`relative flex flex-col items-center md:flex-row ${
                     isLeft ? "md:justify-start" : "md:justify-end"
                   }`}
                 >
@@ -152,56 +199,68 @@ export default function MyJourney() {
                     ref={(el) => {
                       nodeRefs.current[index] = el;
                     }}
-                    className="absolute left-1/2 -translate-x-1/2 w-4 h-4 z-10 hidden md:block"
+                    className="absolute left-1/2 z-10 hidden h-4 w-4 -translate-x-1/2 md:block"
                   >
-                    <motion.div
-                      initial={{ scale: 0 }}
-                      whileInView={{ scale: 1 }}
-                      viewport={{ once: true, amount: 0.6 }}
-                      transition={{ duration: 0.4, ease: "easeOut" }}
-                      className="w-4 h-4 rounded-full bg-black"
-                    />
+                    <TimelineNode />
                   </div>
 
-                  <motion.div
+                  <TiltCard
+                    strength={4}
+                    lift={12}
                     initial={{ opacity: 0, y: 60, scale: 0.95, rotate: 0 }}
                     whileInView={{ opacity: 1, y: 0, scale: 1, rotate: tilt }}
                     whileHover={{ rotate: 0, scale: 1.02 }}
                     viewport={{ once: true, amount: 0.4 }}
-                    transition={{ duration: 0.6, ease: "easeOut" }}
-                    className={`w-full md:w-[46%] bg-[#FF0000] text-white rounded-3xl p-8 md:p-10 shadow-xl ${
+                    transition={{ duration: 0.6, ease: EASE }}
+                    className={`fx-spotlight fx-spotlight-light fx-grain group relative w-full overflow-hidden rounded-3xl bg-signal p-8 text-white shadow-xl md:w-[46%] md:p-10 ${
                       isLeft ? "md:mr-auto" : "md:ml-auto"
                     }`}
                   >
-                    <div className="flex justify-between items-center mb-4">
-                      <span className="text-xs font-mono font-bold uppercase tracking-widest bg-white/10 border border-white/30 px-3 py-1 rounded-full">
+                    {/* Corner ruling, not a number: the card already says
+                        "Phase 02" in the pill, and an oversized figure here
+                        landed on top of the year label. */}
+                    <span
+                      aria-hidden
+                      className="fx-stripes pointer-events-none absolute -right-8 -top-8 h-28 w-28 rotate-12 text-white/40 opacity-50 transition-transform duration-700 ease-out group-hover:rotate-45 group-hover:scale-110"
+                    />
+
+                    <div className="relative z-10 mb-4 flex items-center justify-between">
+                      <span className="rounded-full border border-white/30 bg-white/10 px-3 py-1 font-mono text-xs font-bold uppercase tracking-widest transition-colors duration-300 group-hover:bg-white group-hover:text-signal">
                         {item.phase}
                       </span>
-                      <span className="text-xs font-mono text-white/70">{item.year}</span>
+                      <span className="font-mono text-xs text-white/70">{item.year}</span>
                     </div>
 
-                    <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tight mb-4">
+                    <h3 className="relative z-10 mb-4 text-2xl font-black uppercase tracking-tight md:text-3xl">
                       {item.title}
                     </h3>
 
-                    <ul className="space-y-2 mb-6">
+                    <ul className="relative z-10 mb-6 space-y-2">
                       {item.points.map((point, i) => (
-                        <li key={i} className="flex gap-2 text-sm md:text-base text-white/90 leading-relaxed">
-                          <span className="text-white/60">—</span>
+                        <motion.li
+                          key={i}
+                          initial={{ opacity: 0, x: -12 }}
+                          whileInView={{ opacity: 1, x: 0 }}
+                          viewport={{ once: true, amount: 0.4 }}
+                          transition={{ duration: 0.5, delay: 0.25 + i * 0.09, ease: EASE }}
+                          className="flex gap-2 text-sm leading-relaxed text-white/90 md:text-base"
+                        >
+                          <span aria-hidden className="text-white/60">
+                            —
+                          </span>
                           <span>{point}</span>
-                        </li>
+                        </motion.li>
                       ))}
                     </ul>
 
-                    <p className="text-sm md:text-base italic font-medium leading-relaxed border-t border-white/20 pt-4">
-                      "{item.quote}"
+                    <p className="relative z-10 border-t border-white/20 pt-4 text-sm font-medium italic leading-relaxed md:text-base">
+                      &ldquo;{item.quote}&rdquo;
                     </p>
-                  </motion.div>
+                  </TiltCard>
                 </div>
               );
             })}
           </div>
-
         </div>
       </div>
     </section>

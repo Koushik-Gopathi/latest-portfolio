@@ -124,9 +124,9 @@ function CopyableRow({
         onClick={!href ? handleCopy : undefined}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        className="group flex items-center justify-between w-full bg-white/10 hover:bg-white text-white hover:text-[#FF0000] border border-white/20 hover:border-white rounded-2xl px-6 py-5 md:px-8 md:py-6 transition-colors duration-300 cursor-pointer"
+        className="fx-spotlight fx-spotlight-light fx-sheen group relative flex w-full cursor-pointer items-center justify-between overflow-hidden rounded-2xl border border-white/20 bg-white/10 px-6 py-5 text-white transition-colors duration-300 hover:border-white hover:bg-white hover:text-signal md:px-8 md:py-6"
       >
-        <div className="flex items-center gap-4 md:gap-5">
+        <div className="relative z-10 flex items-center gap-4 md:gap-5">
           <span className="shrink-0">{icon}</span>
           <div className="text-left">
             <p className="text-xs font-mono uppercase tracking-widest opacity-60 mb-1">{label}</p>
@@ -135,13 +135,13 @@ function CopyableRow({
         </div>
 
         {!href ? (
-          <span className="shrink-0">
+          <span className="relative z-10 shrink-0">
             {copied ? <Check size={20} /> : <Copy size={20} className="opacity-50 group-hover:opacity-100" />}
           </span>
         ) : (
           <ArrowUpRight
             size={20}
-            className="shrink-0 opacity-50 group-hover:opacity-100 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+            className="relative z-10 shrink-0 opacity-50 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:opacity-100"
           />
         )}
       </motion.a>
@@ -180,9 +180,35 @@ function FloatingDots() {
   );
 }
 
+/**
+ * The last thing on the page: one line of type running out of the bottom of
+ * the document. It is set in outline rather than solid so it closes the page
+ * without competing with the contact rows above it.
+ */
+function FooterMarquee() {
+  return (
+    <div className="relative z-10 mt-24 overflow-hidden border-t border-white/20 py-8">
+      <motion.div
+        animate={{ x: ["0%", "-50%"] }}
+        transition={{ duration: 22, ease: "linear", repeat: Infinity }}
+        className="flex w-max whitespace-nowrap"
+      >
+        {Array.from({ length: 4 }).map((_, i) => (
+          <span
+            key={i}
+            className="select-none px-6 text-[4rem] font-black uppercase leading-none tracking-tighter text-white md:text-[6rem]"
+          >
+            Let&rsquo;s work together ·
+          </span>
+        ))}
+      </motion.div>
+    </div>
+  );
+}
+
 export default function ContactMe() {
   return (
-    <section className="relative w-full bg-[#FF0000] text-white py-32 px-6 md:px-12 overflow-hidden">
+    <section className="fx-grain relative w-full overflow-hidden bg-signal px-6 pb-0 pt-32 text-white md:px-12">
       <FloatingDots />
 
       <div className="relative z-10 max-w-3xl mx-auto text-center">
@@ -201,11 +227,23 @@ export default function ContactMe() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="text-5xl md:text-8xl font-black uppercase tracking-tighter leading-none mb-6"
+          className="relative mb-6 text-5xl font-black uppercase leading-none tracking-tighter md:text-8xl"
         >
-          <GlitchText text="LET'S" />
-          <br />
-          <GlitchText text="CONNECT" />
+          {/* The hollow copy sits a few pixels off the solid one, which gives
+              the scramble something to register against while it runs. */}
+          <span
+            aria-hidden
+            className="fx-outline pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 translate-y-2 select-none whitespace-nowrap text-white/30"
+          >
+            LET&rsquo;S
+            <br />
+            CONNECT
+          </span>
+          <span className="relative">
+            <GlitchText text="LET'S" />
+            <br />
+            <GlitchText text="CONNECT" />
+          </span>
         </motion.h2>
 
         <motion.p
@@ -246,11 +284,13 @@ export default function ContactMe() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.6 }}
-          className="text-white/50 text-xs font-mono mt-16"
+          className="mt-16 font-mono text-xs text-white/50"
         >
           © {new Date().getFullYear()} Koushik Gopathi
         </motion.p>
       </div>
+
+      <FooterMarquee />
     </section>
   );
 }

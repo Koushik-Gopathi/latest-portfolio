@@ -1,98 +1,287 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useRef, useState } from "react";
+import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
+import type { Variants } from "framer-motion";
+import { ShieldCheck, CodeXml, Smartphone, Palette } from "lucide-react";
+import { MaskText, DrawRule } from "@/components/ui/Reveal";
+
+const EASE = [0.16, 1, 0.3, 1] as const;
 
 const skillCategories = [
   {
     number: "01",
+    icon: ShieldCheck,
     title: "Cybersecurity & Systems",
     subtitle: "Core Engineering & Security Lab",
     description: "Hands-on threat analysis, secure system setups, and fundamental architecture.",
     skills: ["Kali Linux", "SeedLabs", "Operating Systems", "DBMS"],
-    colSpan: "col-span-1 md:col-span-2",
   },
   {
     number: "02",
+    icon: CodeXml,
     title: "Web Development",
     subtitle: "Frontend Architecture",
     description: "Crafting fast, modern, and responsive web applications with clean design patterns.",
     skills: ["React.js", "Next.js", "Express.js", "JavaScript", "HTML/CSS", "Framer Motion"],
-    colSpan: "col-span-1 md:col-span-1",
   },
   {
     number: "03",
+    icon: Smartphone,
     title: "App Development",
     subtitle: "Cross-Platform Solutions",
     description: "Building native-feeling mobile applications and smooth interactive user experiences.",
     skills: ["Flutter", "Dart", "Mobile UI Design"],
-    colSpan: "col-span-1 md:col-span-1",
   },
   {
     number: "04",
+    icon: Palette,
     title: "Design & DevOps Tools",
     subtitle: "Workflow & Craft",
     description: "Translating concepts into high-fidelity interfaces and managing deployment pipelines.",
     skills: ["Figma", "UI/UX Design", "Git & GitHub"],
-    colSpan: "col-span-1 md:col-span-2",
   },
 ];
 
-export default function SkillsBentoGrid() {
+const tagGroup: Variants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.05, delayChildren: 0.1 } },
+};
+
+const tagItem: Variants = {
+  hidden: { opacity: 0, y: 12 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: EASE } },
+};
+
+function SkillRow({
+  category,
+  index,
+  isActive,
+  onHover,
+  onPin,
+  onLeave,
+}: {
+  category: (typeof skillCategories)[number];
+  index: number;
+  isActive: boolean;
+  onHover: () => void;
+  onPin: () => void;
+  onLeave: () => void;
+}) {
+  const reduced = useReducedMotion();
+  const Icon = category.icon;
+  const panelId = `skill-panel-${category.number}`;
+
   return (
-    <section className="relative min-h-screen w-full bg-[#FF0000] text-white py-32 px-6 md:px-16 z-30">
-      
-      {/* Section Header */}
-      <div className="max-w-6xl mx-auto mb-16 flex flex-col md:flex-row justify-between items-start md:items-end border-b border-white/20 pb-6 gap-4">
-        <div>
-          <h2 className="text-4xl md:text-6xl font-black tracking-tighter uppercase text-white">
-            SKILLS & EXPERTISE.
-          </h2>
+    <motion.div
+      initial={reduced ? undefined : { opacity: 0, x: -40 }}
+      whileInView={reduced ? undefined : { opacity: 1, x: 0 }}
+      viewport={{ once: true, amount: 0.4 }}
+      transition={{ duration: 0.7, delay: index * 0.08, ease: EASE }}
+      onPointerEnter={(e) => {
+        // Hover opens the row on a mouse. Touch gets the tap handler instead,
+        // or the panel would open and close under the same thumb.
+        if (e.pointerType === "mouse") onHover();
+      }}
+      onPointerLeave={onLeave}
+      className="relative isolate overflow-hidden"
+    >
+      {/* The white plate. It wipes in from the left across the header AND the
+          panel, so an open row reads as one white band cut out of the red page
+          rather than a card sitting on top of it. */}
+      <motion.span
+        aria-hidden
+        initial={false}
+        animate={{ scaleX: isActive ? 1 : 0 }}
+        transition={{ duration: reduced ? 0 : 0.5, ease: EASE }}
+        style={{ originX: 0 }}
+        className="pointer-events-none absolute inset-0 -z-10 bg-white"
+      />
+
+      <button
+        type="button"
+        onClick={onPin}
+        onFocus={onHover}
+        aria-expanded={isActive}
+        aria-controls={panelId}
+        className="flex w-full cursor-pointer items-center gap-5 px-2 py-7 text-left md:gap-8 md:px-6"
+      >
+        <span
+          className={`font-mono text-xs font-bold transition-colors duration-200 ${
+            isActive ? "text-signal" : "text-white/60"
+          }`}
+        >
+          {category.number}
+        </span>
+
+        <h3
+          className={`text-2xl font-black uppercase leading-none tracking-tighter transition-colors duration-200 md:text-5xl ${
+            isActive ? "text-signal" : "text-white"
+          }`}
+        >
+          {category.title}
+        </h3>
+
+        <span
+          className={`ml-auto hidden shrink-0 font-mono text-[0.62rem] uppercase tracking-[0.22em] transition-colors duration-200 lg:block ${
+            isActive ? "text-signal-ink" : "text-white/60"
+          }`}
+        >
+          {category.subtitle}
+        </span>
+
+        {/* The marker: a plus that turns into a minus as the row opens. */}
+        <span
+          aria-hidden
+          className={`relative ml-auto grid h-9 w-9 shrink-0 place-items-center rounded-full border transition-colors duration-200 lg:ml-8 ${
+            isActive ? "border-signal text-signal" : "border-white/40 text-white"
+          }`}
+        >
+          <span className="absolute h-[1.5px] w-3.5 bg-current" />
+          <motion.span
+            animate={{ rotate: isActive ? 90 : 0, opacity: isActive ? 0 : 1 }}
+            transition={{ duration: 0.45, ease: EASE }}
+            className="absolute h-3.5 w-[1.5px] bg-current"
+          />
+        </span>
+      </button>
+
+      <motion.div
+        id={panelId}
+        initial={false}
+        animate={{ height: isActive ? "auto" : 0, opacity: isActive ? 1 : 0 }}
+        transition={{ duration: reduced ? 0 : 0.55, ease: EASE }}
+        className="overflow-hidden"
+      >
+        <div className="relative grid grid-cols-1 gap-8 px-2 pb-10 md:grid-cols-[1fr_auto] md:px-6">
+          {/* Oversized index, hollow, behind the panel content. */}
+          <span
+            aria-hidden
+            className="fx-outline pointer-events-none absolute -bottom-8 right-2 select-none text-[7rem] font-black leading-none tracking-tighter text-signal/25 [--fx-stroke:2px] md:text-[9rem]"
+          >
+            {category.number}
+          </span>
+
+          <div className="relative max-w-xl">
+            {/* The subtitle only sits in the header on a wide screen; below
+                that it belongs to the panel. */}
+            <span className="mb-4 inline-flex items-center gap-2 rounded-full border border-smoke bg-mist px-3 py-1.5 font-mono text-[0.66rem] font-bold uppercase tracking-wider text-signal-ink lg:hidden">
+              <Icon size={13} strokeWidth={2.6} />
+              {category.subtitle}
+            </span>
+            <p className="text-base font-medium leading-relaxed text-slate md:text-lg">
+              {category.description}
+            </p>
+          </div>
+
+          <motion.div
+            variants={tagGroup}
+            initial={reduced ? undefined : "hidden"}
+            animate={reduced ? undefined : isActive ? "show" : "hidden"}
+            className="relative flex flex-wrap items-start content-start gap-2 md:max-w-md md:justify-end"
+          >
+            {category.skills.map((skill) => (
+              <motion.span
+                key={skill}
+                variants={tagItem}
+                className="cursor-default rounded-xl border border-smoke bg-mist px-3 py-1.5 font-mono text-xs font-bold text-black transition-[transform,background-color,color,border-color] duration-200 hover:-translate-y-0.5 hover:border-signal hover:bg-signal hover:text-white"
+              >
+                {skill}
+              </motion.span>
+            ))}
+          </motion.div>
+        </div>
+      </motion.div>
+    </motion.div>
+  );
+}
+
+export default function SkillsBentoGrid() {
+  const sectionRef = useRef<HTMLElement>(null);
+
+  // Which row is showing. `pinned` is what a click chose; a hover outranks it
+  // while the pointer is on the list, so the list answers the mouse with no
+  // click at all and falls back to the pinned row on the way out.
+  const [pinned, setPinned] = useState(0);
+  const [hovered, setHovered] = useState<number | null>(null);
+  const active = hovered ?? pinned;
+
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ["start end", "end start"],
+  });
+
+  const gridY = useTransform(scrollYProgress, [0, 1], ["-8%", "8%"]);
+  const ghostX = useTransform(scrollYProgress, [0, 1], ["14%", "-26%"]);
+  const ghostOpacity = useTransform(scrollYProgress, [0, 0.4, 1], [0, 0.14, 0]);
+
+  return (
+    <section
+      ref={sectionRef}
+      className="fx-grain relative z-30 min-h-screen w-full overflow-hidden bg-signal px-6 py-32 text-white md:px-16"
+    >
+      <motion.div
+        aria-hidden
+        style={{ y: gridY }}
+        className="fx-rule-grid pointer-events-none absolute inset-x-0 -inset-y-24 text-white/[0.14]"
+      />
+      <div aria-hidden className="fx-dots pointer-events-none absolute inset-0 text-white/20" />
+
+      <motion.span
+        aria-hidden
+        style={{ x: ghostX, opacity: ghostOpacity }}
+        className="fx-outline pointer-events-none absolute left-0 top-1/2 select-none whitespace-nowrap text-[22vw] font-black uppercase leading-none tracking-tighter text-white [--fx-stroke:3px]"
+      >
+        Skills Skills
+      </motion.span>
+
+      <div className="relative z-10">
+        <div className="mx-auto mb-14 max-w-6xl">
+          <div className="flex flex-col items-start justify-between gap-4 pb-6 md:flex-row md:items-end">
+            <h2 className="text-4xl font-black uppercase leading-[0.95] tracking-tighter text-white md:text-6xl">
+              <MaskText text="Skills & Expertise." />
+            </h2>
+
+            <motion.p
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.6 }}
+              transition={{ duration: 0.7, delay: 0.35, ease: EASE }}
+              className="flex shrink-0 items-center gap-2 font-mono text-xs uppercase tracking-[0.28em] text-white/70"
+            >
+              Hover to open
+              <span
+                aria-hidden
+                className="inline-block h-3 w-1.5 bg-white"
+                style={{ animation: "fx-blink 1.1s steps(1) infinite" }}
+              />
+            </motion.p>
+          </div>
+          <DrawRule className="bg-white/40" delay={0.2} />
+        </div>
+
+        {/* One list, four rows — no grid. The type is the layout, and only the
+            row under the pointer is open. */}
+        <div
+          className="mx-auto max-w-6xl divide-y divide-white/25 border-b border-white/25"
+          onPointerLeave={() => setHovered(null)}
+        >
+          {skillCategories.map((category, index) => (
+            <SkillRow
+              key={category.number}
+              category={category}
+              index={index}
+              isActive={active === index}
+              onHover={() => setHovered(index)}
+              onPin={() => {
+                setPinned(index);
+                setHovered(index);
+              }}
+              onLeave={() => setHovered((h) => (h === index ? null : h))}
+            />
+          ))}
         </div>
       </div>
-
-      {/* Bento Grid Layout with White Cards for Contrast */}
-      <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
-        {skillCategories.map((category, index) => (
-          <motion.div
-            key={index}
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: index * 0.12, ease: "easeOut" }}
-            className={`${category.colSpan} group relative bg-white text-black rounded-3xl p-8 flex flex-col justify-between shadow-2xl overflow-hidden`}
-          >
-            <div>
-              <div className="flex justify-between items-center mb-6">
-                <span className="text-xs font-mono font-bold text-[#FF0000] bg-red-50 border border-red-100 px-3 py-1 rounded-full">
-                  {category.subtitle}
-                </span>
-                <span className="text-xs font-mono text-gray-400 font-bold">{category.number}</span>
-              </div>
-
-              <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tight text-gray-900 mb-3">
-                {category.title}
-              </h3>
-
-              <p className="text-gray-600 text-sm md:text-base font-medium leading-relaxed mb-8">
-                {category.description}
-              </p>
-            </div>
-
-            {/* Skill Tags */}
-            <div className="flex flex-wrap gap-2 pt-4 border-t border-gray-100">
-              {category.skills.map((skill, sIndex) => (
-                <span
-                  key={sIndex}
-                  className="text-xs font-mono font-bold bg-gray-100 text-gray-800 border border-gray-200 px-3 py-1.5 rounded-xl"
-                >
-                  {skill}
-                </span>
-              ))}
-            </div>
-          </motion.div>
-        ))}
-      </div>
-
     </section>
   );
 }

@@ -109,7 +109,8 @@
   }
 
   body {
-    background-color: var(--color-paper);
+    /* Red on white. The page's own sections own every other colour. */
+    background-color: #ffffff;
     color: var(--color-ink);
     font-family: var(--font-body);
     -webkit-font-smoothing: antialiased;
@@ -790,5 +791,208 @@
   }
   to {
     transform: translate3d(0, 0, 0);
+  }
+}
+
+/* ===========================================================================
+   RED / WHITE SYSTEM
+   ---------------------------------------------------------------------------
+   The live site is two colours and nothing else: signal red and white. Every
+   grey on the page is red desaturated almost to nothing, not a neutral grey —
+   that is the difference between "red accents on a grey site" and a red site.
+   Named here once so a section never hard-codes #FF0000 again.
+   =========================================================================== */
+@theme {
+  --color-signal: #ff0000;
+  /* Pressed / active red. Darker, never browner. */
+  --color-signal-deep: #d10000;
+  /* For text on white where pure red would vibrate. */
+  --color-signal-ink: #a30000;
+  /* White, carrying the faintest amount of the red so the page reads warm. */
+  --color-bone: #fffafa;
+  /* The greys, all cut from the red. */
+  --color-mist: #f6f0f0;
+  --color-smoke: #e6dede;
+  --color-slate: #6b5f5f;
+}
+
+:root {
+  /* Pointer position inside the currently hovered card, 0-1, written by
+     TiltCard. Used by the spotlight gradients below. */
+  --mx: 50%;
+  --my: 50%;
+}
+
+@layer components {
+  /* ===========================================================================
+     SURFACES
+     Three backgrounds that give the flat red some depth without adding a
+     second hue: a dot grid, diagonal stripes, and film grain. All are
+     pointer-events-none decoration and all sit under `.paper-content`-style
+     stacking.
+     =========================================================================== */
+  .fx-dots {
+    background-image: radial-gradient(currentColor 1px, transparent 1px);
+    background-size: 26px 26px;
+  }
+
+  .fx-stripes {
+    background-image: repeating-linear-gradient(
+      -45deg,
+      currentColor 0 1px,
+      transparent 1px 14px
+    );
+  }
+
+  .fx-rule-grid {
+    background-image:
+      linear-gradient(to right, currentColor 0 1px, transparent 1px 100%),
+      linear-gradient(to bottom, currentColor 0 1px, transparent 1px 100%);
+    background-size: 72px 72px;
+  }
+
+  /* Film grain. Static, cheap, and the single thing that stops a large flat
+     red field from banding on a big display. */
+  .fx-grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.18;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  }
+
+  /* ===========================================================================
+     CARDS
+     `--mx/--my` are written per-card by TiltCard, so the highlight is a real
+     light source following the pointer rather than a static gloss.
+     =========================================================================== */
+  .fx-spotlight::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    background: radial-gradient(
+      340px circle at var(--mx) var(--my),
+      rgba(255, 0, 0, 0.16),
+      transparent 62%
+    );
+  }
+  .fx-spotlight:hover::before {
+    opacity: 1;
+  }
+
+  /* Same idea, inverted, for cards that are already red. */
+  .fx-spotlight-light::before {
+    background: radial-gradient(
+      340px circle at var(--mx) var(--my),
+      rgba(255, 255, 255, 0.22),
+      transparent 62%
+    );
+  }
+
+  /* A single diagonal sheen that sweeps across on hover. Driven on
+     `transform`, not `left`, so the sweep never lays out the card again. */
+  .fx-sheen::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 60%;
+    height: 100%;
+    pointer-events: none;
+    transform: translateX(-200%) skewX(-18deg);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.45),
+      transparent
+    );
+  }
+  .fx-sheen:hover::after {
+    animation: fx-sweep 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Outlined display type — the "ghost" layer behind the big headings.
+     The fill is knocked out with `-webkit-text-fill-color`, NOT with
+     `color: transparent`: the stroke is painted in `currentColor`, so zeroing
+     `color` would take the outline with it and leave nothing on the page.
+     Set the weight per use with `--fx-stroke`; a 22vw word needs far more than
+     a heading does. */
+  .fx-outline {
+    -webkit-text-fill-color: transparent;
+    -webkit-text-stroke: var(--fx-stroke, 1.5px) currentColor;
+  }
+
+  /* An underline that draws itself in from the left on hover. */
+  .fx-underline {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat;
+    background-size: 0% 2px;
+    background-position: 0 100%;
+    transition: background-size 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .fx-underline:hover,
+  .fx-underline:focus-visible {
+    background-size: 100% 2px;
+  }
+
+  /* The cursor stays one near-black dot on every surface. Inverting it with
+     `mix-blend-mode: difference` was tried and reverted: differencing white
+     against #ff0000 comes back cyan, which put a stray teal dot on every red
+     section. Dark reads on both the white pages and the red ones. */
+  .cursor-dot {
+    background: #1f0000;
+  }
+  .cursor-dot[data-hover='true'] {
+    border-color: #1f0000;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fx-sheen:hover::after {
+      animation: none;
+    }
+  }
+}
+
+@keyframes fx-sweep {
+  to {
+    transform: translateX(300%) skewX(-18deg);
+  }
+}
+
+@keyframes fx-float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -12px, 0);
+  }
+}
+
+/* The ring that leaves a timeline node when it lands. */
+@keyframes fx-ring {
+  0% {
+    transform: scale(1);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+
+@keyframes fx-blink {
+  0%,
+  45% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
   }
 }
