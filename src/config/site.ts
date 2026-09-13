@@ -28,6 +28,19 @@ export const site = {
   lastName: '',
 
   /**
+   * What search results and link previews say about you. The description is
+   * cut from your own bio in the About section, so the preview under your name
+   * on Google, WhatsApp or LinkedIn matches what the page itself says.
+   */
+  meta: {
+    title: 'Koushik Gopathi — Developer & Designer',
+    shortName: 'Koushik Gopathi',
+    description:
+      'B.Tech Cybersecurity student building full-stack web apps, cross-platform mobile apps, and interfaces that feel as intentional as the code behind them.',
+    ogImageAlt: 'Koushik Gopathi — Developer and Designer. Portfolio 2026.',
+  },
+
+  /**
    * An invitation, not a job application. "Available to talk" rather than
    * "available for hire" is the whole difference between a personal site and
    * a job board, and it is carried by four words.

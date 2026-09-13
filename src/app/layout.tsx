@@ -1,16 +1,35 @@
 import type { Metadata, Viewport } from 'next'
 import { site } from '@/config/site'
+import { siteUrl } from '@/config/url'
 import SmoothScroll from '@/components/ui/SmoothScroll'
 import Cursor from '@/components/ui/Cursor'
 import './globals.css'
 
+/**
+ * The favicon, Apple touch icon and share image are not listed here: they are
+ * files beside this layout (icon.svg, apple-icon.png, opengraph-image.jpg) and
+ * Next wires them in by name. `metadataBase` is what turns that share image
+ * into an absolute URL — WhatsApp, LinkedIn and X all ignore a relative one.
+ */
 export const metadata: Metadata = {
-  title: `${site.firstName} — ${site.eyebrow.split(' / ')[0]} / ${site.eyebrow.split(' / ')[1]} ${site.year}`,
-  description: site.intro.paragraphs[0],
+  metadataBase: new URL(siteUrl),
+  title: site.meta.title,
+  description: site.meta.description,
+  applicationName: site.meta.shortName,
+  authors: [{ name: site.meta.shortName, url: siteUrl }],
+  alternates: { canonical: '/' },
   openGraph: {
-    title: `${site.firstName} — Portfolio ${site.year}`,
-    description: site.intro.paragraphs[0],
     type: 'website',
+    url: '/',
+    siteName: site.meta.shortName,
+    title: site.meta.title,
+    description: site.meta.description,
+    locale: 'en_IN',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: site.meta.title,
+    description: site.meta.description,
   },
 }
 
