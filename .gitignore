@@ -14,3 +14,6 @@ tools/out
 reference/entire-portfolio.jpg
 reference/hero.jpg
 reference/studio-section.jpg
+
+.vercel
+.env*
