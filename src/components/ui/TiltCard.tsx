@@ -57,7 +57,7 @@ export default function TiltCard({
 
   const handleMove = (e: React.PointerEvent<HTMLDivElement>) => {
     const el = ref.current;
-    if (!el || reduced) return;
+    if (!el || reduced || e.pointerType !== "mouse") return;
     const r = el.getBoundingClientRect();
     const nx = (e.clientX - r.left) / r.width;
     const ny = (e.clientY - r.top) / r.height;
@@ -68,8 +68,8 @@ export default function TiltCard({
     el.style.setProperty("--my", `${(ny * 100).toFixed(1)}%`);
   };
 
-  const handleEnter = () => {
-    if (!reduced) z.set(lift);
+  const handleEnter = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!reduced && e.pointerType === "mouse") z.set(lift);
   };
 
   const handleLeave = () => {

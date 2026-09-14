@@ -115,7 +115,7 @@ function NameReveal({ name, scrollY }: { name: string; scrollY: MotionValue<numb
   const middleRow = 1;
 
   return (
-    <h1 className="flex text-4xl font-black uppercase tracking-widest text-white drop-shadow-md md:text-5xl">
+    <h1 className="flex text-[clamp(1.25rem,7.4vw,3rem)] font-black uppercase tracking-widest text-white drop-shadow-md">
       {letters.map((char, i) => {
         const col = Math.floor((i / letters.length) * COLS);
         const shardIndex = middleRow * COLS + col;
@@ -185,7 +185,7 @@ export default function RedLanding() {
           <p className="mb-5 font-mono text-[0.6rem] uppercase tracking-[0.34em] text-white/80 md:text-xs">
             Developer / Designer
           </p>
-          <h1 className="flex justify-center text-4xl font-black uppercase tracking-widest text-white md:text-5xl">
+          <h1 className="flex justify-center text-[clamp(1.25rem,7.4vw,3rem)] font-black uppercase tracking-widest text-white">
             KOUSHIK GOPATHI
           </h1>
         </div>

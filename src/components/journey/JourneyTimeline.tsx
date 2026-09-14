@@ -3,6 +3,7 @@
 import { useRef, useState, useLayoutEffect } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import TiltCard from "@/components/ui/TiltCard";
+import { useMediaQuery } from "@/lib/hooks";
 import { MaskText } from "@/components/ui/Reveal";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -77,6 +78,8 @@ function TimelineNode() {
 export default function MyJourney() {
   const trackRef = useRef<HTMLDivElement>(null);
   const nodeRefs = useRef<(HTMLDivElement | null)[]>([]);
+  // A full-width card tilted 3deg pokes its corners out of a phone screen.
+  const isWide = useMediaQuery("(min-width: 1024px)");
 
   const [pathD, setPathD] = useState("");
   const [svgTop, setSvgTop] = useState(0);
@@ -139,7 +142,7 @@ export default function MyJourney() {
   }, []);
 
   return (
-    <section className="relative w-full overflow-hidden bg-white px-6 py-32 text-black md:px-12">
+    <section className="relative w-full overflow-hidden bg-white px-6 py-20 text-black md:px-12 md:py-32">
       {/* Faint red field behind the spine, so the white page is not empty
           either side of the cards. */}
       <div
@@ -148,7 +151,7 @@ export default function MyJourney() {
       />
 
       <div className="relative mx-auto max-w-4xl">
-        <div className="mb-24 text-center">
+        <div className="mb-14 text-center md:mb-24">
           <p className="mb-4 font-mono text-[0.65rem] uppercase tracking-[0.4em] text-signal">
             2024 — Present
           </p>
@@ -160,7 +163,7 @@ export default function MyJourney() {
         <div ref={trackRef} className="relative">
           {pathD && (
             <svg
-              className="pointer-events-none absolute left-1/2 hidden -translate-x-1/2 md:block"
+              className="pointer-events-none absolute left-1/2 hidden -translate-x-1/2 lg:block"
               style={{ top: svgTop, overflow: "visible" }}
               width="200"
               height={svgHeight}
@@ -183,23 +186,23 @@ export default function MyJourney() {
             </svg>
           )}
 
-          <div className="flex flex-col gap-24 md:gap-32">
+          <div className="flex flex-col gap-12 md:gap-16 lg:gap-32">
             {journey.map((item, index) => {
               const isLeft = index % 2 === 0;
-              const tilt = isLeft ? -3 : 3;
+              const tilt = (isLeft ? -1 : 1) * (isWide ? 3 : 1);
 
               return (
                 <div
                   key={index}
-                  className={`relative flex flex-col items-center md:flex-row ${
-                    isLeft ? "md:justify-start" : "md:justify-end"
+                  className={`relative flex flex-col items-center lg:flex-row ${
+                    isLeft ? "lg:justify-start" : "lg:justify-end"
                   }`}
                 >
                   <div
                     ref={(el) => {
                       nodeRefs.current[index] = el;
                     }}
-                    className="absolute left-1/2 z-10 hidden h-4 w-4 -translate-x-1/2 md:block"
+                    className="absolute left-1/2 z-10 hidden h-4 w-4 -translate-x-1/2 lg:block"
                   >
                     <TimelineNode />
                   </div>
@@ -212,8 +215,8 @@ export default function MyJourney() {
                     whileHover={{ rotate: 0, scale: 1.02 }}
                     viewport={{ once: true, amount: 0.4 }}
                     transition={{ duration: 0.6, ease: EASE }}
-                    className={`fx-spotlight fx-spotlight-light fx-grain group relative w-full overflow-hidden rounded-3xl bg-signal p-8 text-white shadow-xl md:w-[46%] md:p-10 ${
-                      isLeft ? "md:mr-auto" : "md:ml-auto"
+                    className={`fx-spotlight fx-spotlight-light fx-grain group relative w-full overflow-hidden rounded-3xl bg-signal p-8 text-white shadow-xl md:p-10 lg:w-[46%] ${
+                      isLeft ? "lg:mr-auto" : "lg:ml-auto"
                     }`}
                   >
                     {/* Corner ruling, not a number: the card already says

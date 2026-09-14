@@ -59,7 +59,7 @@ function VelocityRow({ text, baseVelocity }: { text: string; baseVelocity: numbe
         {Array.from({ length: 4 }).map((_, i) => (
           <span
             key={i}
-            className="px-8 text-[14rem] font-black uppercase leading-none tracking-tighter text-white"
+            className="px-8 text-[7rem] sm:text-[10rem] md:text-[14rem] font-black uppercase leading-none tracking-tighter text-white"
           >
             {text}
           </span>
@@ -97,7 +97,7 @@ export default function WorkspaceShowcase() {
             <>
               <div className="overflow-hidden">
                 <div className="flex whitespace-nowrap">
-                  <span className="px-8 text-[14rem] font-black uppercase leading-none tracking-tighter text-white">
+                  <span className="px-8 text-[7rem] sm:text-[10rem] md:text-[14rem] font-black uppercase leading-none tracking-tighter text-white">
                     KOUSHIK GOPATHI
                   </span>
                 </div>
@@ -133,7 +133,7 @@ export default function WorkspaceShowcase() {
               alt="Koushik Gopathi"
               width={1200}
               height={675}
-              className="pointer-events-none h-auto w-full select-none object-contain drop-shadow-2xl"
+              className="pointer-events-none h-auto w-[135%] max-w-none select-none object-contain drop-shadow-2xl sm:w-full sm:max-w-full"
               priority
             />
           </motion.div>

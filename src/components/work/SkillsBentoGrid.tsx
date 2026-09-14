@@ -104,7 +104,7 @@ function SkillRow({
         onFocus={onHover}
         aria-expanded={isActive}
         aria-controls={panelId}
-        className="flex w-full cursor-pointer items-center gap-5 px-2 py-7 text-left md:gap-8 md:px-6"
+        className="flex w-full cursor-pointer items-center gap-3 px-3 py-6 text-left sm:gap-4 sm:px-4 md:gap-8 md:px-6 md:py-7"
       >
         <span
           className={`font-mono text-xs font-bold transition-colors duration-200 ${
@@ -115,7 +115,7 @@ function SkillRow({
         </span>
 
         <h3
-          className={`text-2xl font-black uppercase leading-none tracking-tighter transition-colors duration-200 md:text-5xl ${
+          className={`min-w-0 text-[clamp(1.2rem,6.4vw,1.5rem)] font-black uppercase leading-none tracking-tighter hyphens-auto transition-colors duration-200 md:text-4xl lg:text-5xl ${
             isActive ? "text-signal" : "text-white"
           }`}
         >
@@ -133,7 +133,7 @@ function SkillRow({
         {/* The marker: a plus that turns into a minus as the row opens. */}
         <span
           aria-hidden
-          className={`relative ml-auto grid h-9 w-9 shrink-0 place-items-center rounded-full border transition-colors duration-200 lg:ml-8 ${
+          className={`relative ml-auto grid h-8 w-8 shrink-0 place-items-center sm:h-9 sm:w-9 rounded-full border transition-colors duration-200 lg:ml-8 ${
             isActive ? "border-signal text-signal" : "border-white/40 text-white"
           }`}
         >
@@ -153,7 +153,7 @@ function SkillRow({
         transition={{ duration: reduced ? 0 : 0.55, ease: EASE }}
         className="overflow-hidden"
       >
-        <div className="relative grid grid-cols-1 gap-8 px-2 pb-10 md:grid-cols-[1fr_auto] md:px-6">
+        <div className="relative grid grid-cols-1 gap-6 px-3 pb-10 sm:px-4 md:px-6 lg:grid-cols-[1fr_auto] lg:gap-8">
           {/* Oversized index, hollow, behind the panel content. */}
           <span
             aria-hidden
@@ -178,7 +178,7 @@ function SkillRow({
             variants={tagGroup}
             initial={reduced ? undefined : "hidden"}
             animate={reduced ? undefined : isActive ? "show" : "hidden"}
-            className="relative flex flex-wrap items-start content-start gap-2 md:max-w-md md:justify-end"
+            className="relative flex flex-wrap items-start content-start gap-2 lg:max-w-md lg:justify-end"
           >
             {category.skills.map((skill) => (
               <motion.span
@@ -218,7 +218,7 @@ export default function SkillsBentoGrid() {
   return (
     <section
       ref={sectionRef}
-      className="fx-grain relative z-30 min-h-screen w-full overflow-hidden bg-signal px-6 py-32 text-white md:px-16"
+      className="fx-grain relative z-30 min-h-screen w-full overflow-hidden bg-signal px-4 py-20 text-white sm:px-6 md:px-16 md:py-32"
     >
       <motion.div
         aria-hidden

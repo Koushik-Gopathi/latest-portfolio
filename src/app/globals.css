@@ -996,3 +996,67 @@
     opacity: 0;
   }
 }
+
+/* ABOUT — FIT THE PINNED BLOCK
+   The About block is pinned to one screen and centred in it, so if it is
+   taller than the screen it loses its top AND its bottom. At 360x640 the
+   title and the third card were both cut off. Everything here scales with
+   height as well as width, and sheds detail as the screen gets shorter. */
+@layer components {
+  /* 15vw alone put an 8rem word on a laptop only 700px tall. */
+  .about-title {
+    font-size: clamp(2.5rem, min(15vw, 13vh), 8rem);
+  }
+
+  .about-bio {
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+  @media (min-width: 640px) {
+    .about-bio {
+      font-size: 1rem;
+    }
+  }
+  @media (min-width: 768px) {
+    .about-bio {
+      font-size: 1.125rem;
+      line-height: 1.625;
+    }
+  }
+
+  /* Card descriptions only where there is height to spare. The titles and
+     icons stay; the Skills section further down says the rest. */
+  .about-card-desc {
+    display: none;
+  }
+  @media (min-width: 768px) and (min-height: 640px), (min-height: 780px) {
+    .about-card-desc {
+      display: block;
+    }
+  }
+
+  /* The card stack's display lives here rather than in Tailwind classes on
+     the element: a `flex` utility sits in a later cascade layer than this one
+     and would beat the `display: none` below, so the cards would never hide. */
+  .about-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  /* A small phone (320x568) or a phone on its side: tighter bio. Measured to
+     fit with the cards still showing. */
+  @media (max-height: 600px) {
+    .about-bio {
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+  }
+
+  /* Only below that does the block genuinely run out of room: bio only. */
+  @media (max-height: 360px) {
+    .about-cards {
+      display: none;
+    }
+  }
+}

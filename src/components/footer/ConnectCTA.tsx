@@ -126,11 +126,11 @@ function CopyableRow({
         whileTap={{ scale: 0.98 }}
         className="fx-spotlight fx-spotlight-light fx-sheen group relative flex w-full cursor-pointer items-center justify-between overflow-hidden rounded-2xl border border-white/20 bg-white/10 px-6 py-5 text-white transition-colors duration-300 hover:border-white hover:bg-white hover:text-signal md:px-8 md:py-6"
       >
-        <div className="relative z-10 flex items-center gap-4 md:gap-5">
+        <div className="relative z-10 flex min-w-0 items-center gap-4 md:gap-5">
           <span className="shrink-0">{icon}</span>
-          <div className="text-left">
+          <div className="min-w-0 text-left">
             <p className="text-xs font-mono uppercase tracking-widest opacity-60 mb-1">{label}</p>
-            <p className="text-base md:text-xl font-bold tracking-tight">{value}</p>
+            <p className="text-base md:text-xl font-bold tracking-tight [overflow-wrap:anywhere]">{value}</p>
           </div>
         </div>
 
@@ -208,7 +208,7 @@ function FooterMarquee() {
 
 export default function ContactMe() {
   return (
-    <section className="fx-grain relative w-full overflow-hidden bg-signal px-6 pb-0 pt-32 text-white md:px-12">
+    <section className="fx-grain relative w-full overflow-hidden bg-signal px-6 pb-0 pt-20 text-white md:px-12 md:pt-32">
       <FloatingDots />
 
       <div className="relative z-10 max-w-3xl mx-auto text-center">

@@ -38,6 +38,28 @@ export function usePrefersReducedMotion() {
 }
 
 /**
+ * Whether a media query matches. Same lazy-initialiser pattern as
+ * `usePrefersReducedMotion`, so it is right from the first client render and
+ * `false` on the server. Use it for animation values, never for markup that
+ * has to match the server render.
+ */
+export function useMediaQuery(query: string) {
+  const [matches, setMatches] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia(query).matches,
+  )
+
+  useEffect(() => {
+    const mq = window.matchMedia(query)
+    const sync = () => setMatches(mq.matches)
+    sync()
+    mq.addEventListener('change', sync)
+    return () => mq.removeEventListener('change', sync)
+  }, [query])
+
+  return matches
+}
+
+/**
  * Writes a smoothed, viewport-normalised pointer vector onto the root element
  * as `--px` / `--py`, both in the range -1…1.
  *

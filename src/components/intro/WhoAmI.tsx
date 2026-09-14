@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
 import { ShieldCheck, Code2, Palette, ArrowUpRight } from "lucide-react";
 import TiltCard from "@/components/ui/TiltCard";
+import { useMediaQuery } from "@/lib/hooks";
 
 const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%&*_";
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -92,7 +93,7 @@ function SkillCard({
       whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true, amount: 0.6 }}
       transition={{ duration: 0.6, delay: index * 0.12, ease: EASE }}
-      className="fx-spotlight group relative flex cursor-default items-start gap-4 overflow-hidden rounded-2xl border border-smoke bg-white px-5 py-4 text-left shadow-[0_12px_40px_-26px_rgba(0,0,0,0.5)] transition-colors duration-300 hover:border-signal hover:bg-signal"
+      className="fx-spotlight group relative flex cursor-default items-start gap-4 overflow-hidden rounded-2xl border border-smoke bg-white px-4 py-3 text-left md:px-5 md:py-4 shadow-[0_12px_40px_-26px_rgba(0,0,0,0.5)] transition-colors duration-300 hover:border-signal hover:bg-signal"
     >
       {/* A red plate that wipes in from the left under the content, so the
           hover is a fill rather than a colour swap. */}
@@ -108,7 +109,7 @@ function SkillCard({
         <h4 className="mb-1 text-sm font-black uppercase tracking-tight text-black transition-colors duration-300 group-hover:text-white md:text-base">
           {title}
         </h4>
-        <p className="text-xs leading-relaxed text-slate transition-colors duration-300 group-hover:text-white/90 md:text-sm">
+        <p className="about-card-desc text-xs leading-relaxed text-slate transition-colors duration-300 group-hover:text-white/90 md:text-sm">
           {description}
         </p>
       </div>
@@ -130,7 +131,10 @@ export default function WhoAmI() {
   const titleY = useTransform(scrollY, [600, 750], [40, 0]);
   // The heading keeps moving after it has arrived — it drifts up and loosens
   // its tracking as the block below it takes over.
-  const titleDrift = useTransform(scrollY, [750, 1500], [0, -70]);
+  // On a short screen there is no headroom above the title to drift into:
+  // the full 70px lift pushed it off the top of a 640px phone.
+  const roomy = useMediaQuery("(min-height: 760px)");
+  const titleDrift = useTransform(scrollY, [750, 1500], [0, roomy ? -70 : -16]);
   const titleScale = useTransform(scrollY, [600, 1500], [1.08, 0.94]);
   const ghostX = useTransform(scrollY, [600, 1600], [-40, 60]);
 
@@ -204,8 +208,8 @@ export default function WhoAmI() {
   const bioWords = shortBio.split(" ");
 
   return (
-    <div className="relative z-0 h-[280vh] w-full bg-white text-black">
-      <div className="sticky top-0 flex h-screen w-full flex-col items-center justify-center gap-10 overflow-hidden px-4 md:px-10">
+    <div className="relative z-0 h-[max(280vh,2600px)] w-full bg-white text-black">
+      <div className="sticky top-0 flex h-screen w-full flex-col items-center justify-center gap-6 overflow-hidden px-4 py-6 md:gap-10 md:px-10">
         {/* Ambient red wash behind everything, drifting against the heading. */}
         <motion.div
           aria-hidden
@@ -230,14 +234,14 @@ export default function WhoAmI() {
           <motion.h2
             aria-hidden
             style={{ opacity: titleOpacity, y: titleDrift, x: ghostX, scale: titleScale }}
-            className="fx-outline absolute inset-0 hidden select-none whitespace-nowrap text-center text-6xl font-black uppercase leading-none tracking-tighter text-signal/40 [--fx-stroke:2px] md:block md:text-[8rem]"
+            className="about-title fx-outline absolute inset-0 hidden select-none whitespace-nowrap text-center font-black uppercase leading-none tracking-tighter text-signal/40 [--fx-stroke:2px] md:block"
           >
             WHO AM I?
           </motion.h2>
 
           <motion.h2
             style={{ opacity: titleOpacity, y: titleTotalY }}
-            className="relative select-none whitespace-nowrap text-center text-6xl font-black uppercase leading-none tracking-tighter text-signal md:text-[8rem]"
+            className="about-title relative select-none whitespace-nowrap text-center font-black uppercase leading-none tracking-tighter text-signal"
           >
             WHO AM I?
           </motion.h2>
@@ -245,17 +249,27 @@ export default function WhoAmI() {
 
         <motion.div
           style={{ opacity: contentOpacity, y: contentY }}
-          className="relative mx-auto grid w-full max-w-5xl grid-cols-1 items-center gap-10 px-4 md:grid-cols-2 md:gap-16"
+          className="relative mx-auto grid w-full max-w-5xl grid-cols-1 items-center gap-6 px-2 sm:px-4 md:grid-cols-2 md:gap-16"
         >
           {/* Left: the bio, typed out. The finished text swaps to per-word
               spans so each word can scramble on hover; the caret stays put
               either way, because a typewriter that loses its cursor the
               instant it finishes stops reading as one. */}
           <div className="text-left">
-            <p className="min-h-[190px] text-base font-medium leading-relaxed text-black md:min-h-[210px] md:text-lg">
+            <p className="about-bio relative font-medium text-black">
               <span className="sr-only">{shortBio}</span>
 
-              <span aria-hidden>
+              {/* An invisible copy of the finished paragraph holds its exact
+                  final height from the first frame, at any width. The old
+                  fixed min-height was a guess that was wrong on every phone:
+                  the column grew line by line as it typed, and because the
+                  pinned block is centred, everything above it crept upward. */}
+              <span aria-hidden className="invisible">
+                {shortBio}
+                <span className="ml-0.5 inline-block w-[0.5ch]" />
+              </span>
+
+              <span aria-hidden className="absolute inset-0">
                 {!typingDone
                   ? typedBio
                   : bioWords.map((word, i) => (
@@ -272,7 +286,7 @@ export default function WhoAmI() {
           </div>
 
           {/* Right: interactive skill cards */}
-          <div className="flex flex-col gap-3">
+          <div className="about-cards">
             {skills.map((skill, i) => (
               <SkillCard
                 key={skill.title}

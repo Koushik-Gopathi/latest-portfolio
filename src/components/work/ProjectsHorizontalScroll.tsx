@@ -1,12 +1,13 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   motion,
   useScroll,
   useTransform,
   useSpring,
   useVelocity,
+  useMotionValue,
   useMotionValueEvent,
   useReducedMotion,
 } from "framer-motion";
@@ -62,7 +63,27 @@ export default function ProjectsHorizontalScroll() {
 
   const { scrollYProgress } = useScroll({ target: targetRef });
 
-  const x = useTransform(scrollYProgress, [0, 1], ["2%", "-70%"]);
+  // How far the rail travels: exactly the track's overhang past its frame,
+  // measured. The old "-70%" was tuned on a wide screen and parked the last
+  // card half off-screen on a phone and fully off-screen at 360px. Measured
+  // again whenever either box resizes (rotation, font load, window drag).
+  const trackRef = useRef<HTMLDivElement>(null);
+  const maxShift = useMotionValue(0);
+  useEffect(() => {
+    const track = trackRef.current;
+    const frame = track?.parentElement;
+    if (!track || !frame) return;
+    const measure = () => maxShift.set(Math.max(0, track.offsetWidth - frame.clientWidth));
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(track);
+    ro.observe(frame);
+    return () => ro.disconnect();
+  }, [maxShift]);
+  // Both inputs listed explicitly, so the rail re-resolves when EITHER moves:
+  // a reload restored mid-section measures after the first scroll value is
+  // read, and must still land in place without waiting for the next scroll.
+  const x = useTransform([scrollYProgress, maxShift], ([p, m]: number[]) => -p * m);
 
   // The track leans into the scroll. Velocity is springed first, so the lean
   // builds and releases instead of snapping on every wheel tick — this is the
@@ -99,7 +120,7 @@ export default function ProjectsHorizontalScroll() {
         </motion.span>
 
         {/* Section Header */}
-        <div className="relative mx-auto mb-10 flex w-full max-w-7xl items-end justify-between px-6 md:px-12">
+        <div className="relative mx-auto mb-6 flex w-full max-w-7xl items-end justify-between px-6 md:mb-10 md:px-12">
           <div>
             <h2 className="text-4xl font-black uppercase leading-[0.95] tracking-tighter md:text-6xl">
               <MaskText text="Designed to ship." />
@@ -117,7 +138,8 @@ export default function ProjectsHorizontalScroll() {
         <div className="relative flex w-full overflow-hidden">
           <motion.div
             style={reduced ? { x } : { x, skewX: skew }}
-            className="flex gap-6 px-6 md:px-12"
+            ref={trackRef}
+            className="flex w-max gap-4 px-6 md:gap-6 md:px-12"
           >
             {projects.map((project, index) => {
               const isHovered = hoveredIndex === index;
@@ -155,7 +177,7 @@ export default function ProjectsHorizontalScroll() {
                       y: { duration: 0.3, ease: EASE },
                       boxShadow: { duration: 0.3, ease: EASE },
                     }}
-                    className="group relative flex h-[420px] w-[320px] flex-col justify-between overflow-hidden rounded-3xl border p-8 md:w-[450px]"
+                    className="group relative flex h-[400px] w-[min(320px,82vw)] flex-col justify-between overflow-hidden rounded-3xl border p-6 sm:p-8 md:h-[420px] md:w-[450px]"
                   >
                     {/* Index watermark. It slides in from the corner on hover
                         instead of sitting there permanently. */}
@@ -242,7 +264,7 @@ export default function ProjectsHorizontalScroll() {
         </div>
 
         {/* The rail's own progress, so the horizontal move has a readout. */}
-        <div className="mx-auto mt-10 w-full max-w-7xl px-6 md:px-12">
+        <div className="mx-auto mt-6 w-full max-w-7xl px-6 md:mt-10 md:px-12">
           <DrawRule className="bg-smoke" />
           <motion.div
             style={{ scaleX: railScale, transformOrigin: "left" }}
