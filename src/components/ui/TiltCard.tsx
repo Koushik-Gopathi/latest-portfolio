@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef } from "react";
-import { motion, useMotionValue, useSpring, useReducedMotion, useTransform } from "framer-motion";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { usePrefersReducedMotion } from "@/lib/hooks";
 import type { MotionStyle, TargetAndTransition, Transition, VariantLabels } from "framer-motion";
 
 type TiltCardProps = {
@@ -44,7 +45,7 @@ export default function TiltCard({
   ...motionProps
 }: TiltCardProps) {
   const ref = useRef<HTMLDivElement>(null);
-  const reduced = useReducedMotion();
+  const reduced = usePrefersReducedMotion();
 
   // -1..1 across the card, before springing.
   const px = useMotionValue(0);

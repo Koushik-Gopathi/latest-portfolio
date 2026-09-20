@@ -9,8 +9,9 @@ import {
   useSpring,
   useMotionValue,
   useAnimationFrame,
-  useReducedMotion,
+  useInView,
 } from "framer-motion";
+import { usePrefersReducedMotion } from "@/lib/hooks";
 import Image from "next/image";
 
 /** Keeps a value inside [min, max) by wrapping it — framer has no `wrap`. */
@@ -29,7 +30,16 @@ function wrap(min: number, max: number, v: number) {
  * scrolling back drags it the other way — the marquee becomes part of the
  * scroll rather than decoration playing next to it.
  */
-function VelocityRow({ text, baseVelocity }: { text: string; baseVelocity: number }) {
+function VelocityRow({
+  text,
+  baseVelocity,
+  active,
+}: {
+  text: string;
+  baseVelocity: number;
+  /** Off-screen, the loop below does nothing: no point animating a band nobody can see. */
+  active: boolean;
+}) {
   const baseX = useMotionValue(0);
   const { scrollY } = useScroll();
   const scrollVelocity = useVelocity(scrollY);
@@ -43,6 +53,7 @@ function VelocityRow({ text, baseVelocity }: { text: string; baseVelocity: numbe
   const direction = useRef(1);
 
   useAnimationFrame((_t, delta) => {
+    if (!active) return;
     let moveBy = direction.current * baseVelocity * (delta / 1000);
 
     const factor = velocityFactor.get();
@@ -71,7 +82,9 @@ function VelocityRow({ text, baseVelocity }: { text: string; baseVelocity: numbe
 
 export default function WorkspaceShowcase() {
   const containerRef = useRef<HTMLElement>(null);
-  const reduced = useReducedMotion();
+  const reduced = usePrefersReducedMotion();
+  // A margin, so the rows are already moving by the time the band arrives.
+  const inView = useInView(containerRef, { margin: "300px" });
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -105,8 +118,8 @@ export default function WorkspaceShowcase() {
             </>
           ) : (
             <>
-              <VelocityRow text="KOUSHIK GOPATHI" baseVelocity={-2.4} />
-              <VelocityRow text="KOUSHIK GOPATHI" baseVelocity={2.4} />
+              <VelocityRow text="KOUSHIK GOPATHI" baseVelocity={-2.4} active={inView} />
+              <VelocityRow text="KOUSHIK GOPATHI" baseVelocity={2.4} active={inView} />
             </>
           )}
         </div>
@@ -140,7 +153,7 @@ export default function WorkspaceShowcase() {
         </div>
 
         {/* Corner furniture — it tells you where you are on the page. */}
-        <div className="pointer-events-none absolute inset-x-6 bottom-8 z-20 flex items-end justify-between font-mono text-[0.6rem] uppercase tracking-[0.3em] text-white/70 md:inset-x-12">
+        <div className="pointer-events-none absolute inset-x-6 bottom-8 z-20 flex items-end justify-between font-mono text-[0.6rem] uppercase tracking-[0.3em] text-white md:inset-x-12">
           <span>Based in India</span>
           <span>Open to work</span>
         </div>

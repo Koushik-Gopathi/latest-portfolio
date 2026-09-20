@@ -1,137 +1,36 @@
 "use client";
 
 import { useRef, useState, useEffect } from "react";
-import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
-import { ShieldCheck, Code2, Palette, ArrowUpRight } from "lucide-react";
-import TiltCard from "@/components/ui/TiltCard";
-import { useMediaQuery } from "@/lib/hooks";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { Download } from "lucide-react";
+import { useMediaQuery, usePrefersReducedMotion } from "@/lib/hooks";
+import { site } from "@/config/site";
 
-const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%&*_";
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-function GlitchText({ text, className = "" }: { text: string; className?: string }) {
-  const [displayText, setDisplayText] = useState(text);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  const scramble = () => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    let frame = 0;
-    const totalFrames = Math.max(10, text.length * 2.5);
-
-    intervalRef.current = setInterval(() => {
-      frame++;
-      if (frame >= totalFrames) {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-        setDisplayText(text);
-        return;
-      }
-      setDisplayText(
-        text
-          .split("")
-          .map((ch) => (ch === " " ? " " : LETTERS[Math.floor(Math.random() * LETTERS.length)]))
-          .join("")
-      );
-    }, 40);
-  };
-
-  const stopScramble = () => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    setDisplayText(text);
-  };
-
-  // Always clear on unmount, or a scramble left running keeps setState firing
-  // into a dead component.
-  useEffect(() => () => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-  }, []);
-
-  return (
-    <span
-      onMouseEnter={scramble}
-      onMouseLeave={stopScramble}
-      className={`inline-block cursor-pointer transition-colors duration-200 hover:text-signal ${className}`}
-    >
-      {displayText}
-    </span>
-  );
-}
-
-const skills = [
-  {
-    icon: ShieldCheck,
-    title: "Cybersecurity",
-    description: "Securing systems, understanding attack surfaces, thinking like a defender.",
-  },
-  {
-    icon: Code2,
-    title: "Web & App Dev",
-    description: "Building scalable full-stack applications with modern frameworks.",
-  },
-  {
-    icon: Palette,
-    title: "Design",
-    description: "Crafting clean, intentional interfaces that feel as good as they look.",
-  },
+/**
+ * The facts a recruiter scans for, in the first block of the page.
+ *
+ * This replaces three cards that repeated the Skills section further down
+ * (Cybersecurity / Web & App Dev / Design) — the same three headings twice on
+ * one page told the visitor nothing the second time.
+ */
+const facts = [
+  ["Course", "B.Tech CSE — Cyber Security"],
+  ["College", "Amrita Vishwa Vidyapeetham, Amritapuri"],
+  ["Year", "3rd year · graduating 2028"],
+  ["CGPA", "7.61 / 10"],
+  ["Open to", "Internships & freelance"],
 ];
-
-function SkillCard({
-  icon: Icon,
-  title,
-  description,
-  index,
-}: {
-  icon: typeof ShieldCheck;
-  title: string;
-  description: string;
-  index: number;
-}) {
-  return (
-    <TiltCard
-      strength={5}
-      lift={14}
-      initial={{ opacity: 0, x: 40 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true, amount: 0.6 }}
-      transition={{ duration: 0.6, delay: index * 0.12, ease: EASE }}
-      className="fx-spotlight group relative flex cursor-default items-start gap-4 overflow-hidden rounded-2xl border border-smoke bg-white px-4 py-3 text-left md:px-5 md:py-4 shadow-[0_12px_40px_-26px_rgba(0,0,0,0.5)] transition-colors duration-300 hover:border-signal hover:bg-signal"
-    >
-      {/* A red plate that wipes in from the left under the content, so the
-          hover is a fill rather than a colour swap. */}
-      <span
-        aria-hidden
-        className="pointer-events-none absolute inset-0 origin-left scale-x-0 bg-signal transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-x-100"
-      />
-
-      <div className="relative z-10 mt-0.5 shrink-0 text-signal transition-colors duration-300 group-hover:text-white">
-        <Icon size={22} strokeWidth={2.2} />
-      </div>
-      <div className="relative z-10">
-        <h4 className="mb-1 text-sm font-black uppercase tracking-tight text-black transition-colors duration-300 group-hover:text-white md:text-base">
-          {title}
-        </h4>
-        <p className="about-card-desc text-xs leading-relaxed text-slate transition-colors duration-300 group-hover:text-white/90 md:text-sm">
-          {description}
-        </p>
-      </div>
-
-      <ArrowUpRight
-        size={16}
-        aria-hidden
-        className="relative z-10 mt-1 shrink-0 -translate-x-1 text-white opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:opacity-100"
-      />
-    </TiltCard>
-  );
-}
 
 export default function WhoAmI() {
   const { scrollY } = useScroll();
-  const reduced = useReducedMotion();
+  const reduced = usePrefersReducedMotion();
 
   const titleOpacity = useTransform(scrollY, [600, 750], [0, 1]);
   const titleY = useTransform(scrollY, [600, 750], [40, 0]);
-  // The heading keeps moving after it has arrived — it drifts up and loosens
-  // its tracking as the block below it takes over.
-  // On a short screen there is no headroom above the title to drift into:
+  // The heading keeps moving after it has arrived — it drifts up as the block
+  // below takes over. On a short screen there is no headroom to drift into:
   // the full 70px lift pushed it off the top of a 640px phone.
   const roomy = useMediaQuery("(min-height: 760px)");
   const titleDrift = useTransform(scrollY, [750, 1500], [0, roomy ? -70 : -16]);
@@ -153,17 +52,20 @@ export default function WhoAmI() {
 
   /**
    * The bio types itself out, once, the first time the block is more than half
-   * revealed.
+   * revealed — in about a second and a half rather than six seconds. Nobody
+   * should have to wait out an animation to read the one paragraph that says
+   * who you are.
    *
-   * Three things here are deliberate:
+   * It advances several characters per tick instead of one character per 5ms:
+   * same speed on screen, a fifth of the renders.
+   *
+   * Two other things here are deliberate:
    *
    * - The trigger is the block's own reveal progress, not an intersection
-   *   observer. The container is `sticky top-0` inside a 280vh section, so the
-   *   paragraph is technically on screen from the very first frame — an
-   *   observer would type the whole thing out behind the red landing plate and
-   *   the visitor would arrive to finished text.
-   * - The current value is checked on mount as well as subscribed to, so a
-   *   reload halfway down the page still types.
+   *   observer. The container is `sticky top-0` inside a very tall section, so
+   *   the paragraph is technically on screen from the first frame — an observer
+   *   would type it out behind the red landing plate and the visitor would
+   *   arrive to finished text.
    * - The "has it started" flag is a ref and the cleanup does NOT clear the
    *   interval. A state flag would make this effect depend on a value it sets,
    *   so the re-subscribe would tear down the interval it created a tick
@@ -176,17 +78,19 @@ export default function WhoAmI() {
       return;
     }
 
+    const STEP = 4;
     const start = () => {
       if (startedRef.current) return;
       startedRef.current = true;
 
       let i = 0;
       typingTimerRef.current = setInterval(() => {
+        i += STEP;
         if (i < shortBio.length) {
-          setTypedBio(shortBio.substring(0, i + 1));
-          i++;
+          setTypedBio(shortBio.slice(0, i));
         } else {
           if (typingTimerRef.current) clearInterval(typingTimerRef.current);
+          setTypedBio(shortBio);
           setTypingDone(true);
         }
       }, 13);
@@ -205,8 +109,6 @@ export default function WhoAmI() {
     []
   );
 
-  const bioWords = shortBio.split(" ");
-
   return (
     <div className="relative z-0 h-[max(280vh,2600px)] w-full bg-white text-black">
       <div className="sticky top-0 flex h-screen w-full flex-col items-center justify-center gap-6 overflow-hidden px-4 py-6 md:gap-10 md:px-10">
@@ -216,7 +118,7 @@ export default function WhoAmI() {
           style={{ x: ghostX }}
           className="pointer-events-none absolute left-1/2 top-1/2 h-[70vh] w-[70vh] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-70 blur-3xl"
         >
-          <div className="h-full w-full rounded-full bg-[radial-gradient(circle,rgba(255,0,0,0.14),transparent_65%)]" />
+          <div className="h-full w-full rounded-full bg-[radial-gradient(circle,rgba(238,0,0,0.14),transparent_65%)]" />
         </motion.div>
         <div aria-hidden className="fx-dots pointer-events-none absolute inset-0 text-signal/15" />
 
@@ -251,32 +153,25 @@ export default function WhoAmI() {
           style={{ opacity: contentOpacity, y: contentY }}
           className="relative mx-auto grid w-full max-w-5xl grid-cols-1 items-center gap-6 px-2 sm:px-4 md:grid-cols-2 md:gap-16"
         >
-          {/* Left: the bio, typed out. The finished text swaps to per-word
-              spans so each word can scramble on hover; the caret stays put
-              either way, because a typewriter that loses its cursor the
-              instant it finishes stops reading as one. */}
+          {/* Left: the bio, typed out. The caret stays after the last
+              character, because a typewriter that loses its cursor the instant
+              it finishes stops reading as one. The hover-scramble that used to
+              sit on these words is gone: turning the one paragraph that
+              explains you into gibberish is a toy fighting the reader. */}
           <div className="text-left">
             <p className="about-bio relative font-medium text-black">
               <span className="sr-only">{shortBio}</span>
 
               {/* An invisible copy of the finished paragraph holds its exact
-                  final height from the first frame, at any width. The old
-                  fixed min-height was a guess that was wrong on every phone:
-                  the column grew line by line as it typed, and because the
-                  pinned block is centred, everything above it crept upward. */}
+                  final height from the first frame, at any width, so the
+                  centred block does not creep upward as the text grows. */}
               <span aria-hidden className="invisible">
                 {shortBio}
                 <span className="ml-0.5 inline-block w-[0.5ch]" />
               </span>
 
               <span aria-hidden className="absolute inset-0">
-                {!typingDone
-                  ? typedBio
-                  : bioWords.map((word, i) => (
-                      <span key={i}>
-                        <GlitchText text={word} />{" "}
-                      </span>
-                    ))}
+                {typingDone ? shortBio : typedBio}
                 <span
                   className="ml-0.5 inline-block h-[1.05em] w-[0.5ch] translate-y-[0.16em] bg-signal"
                   style={{ animation: "fx-blink 1.05s steps(1) infinite" }}
@@ -285,17 +180,48 @@ export default function WhoAmI() {
             </p>
           </div>
 
-          {/* Right: interactive skill cards */}
+          {/* Right: the facts, and the CV. */}
           <div className="about-cards">
-            {skills.map((skill, i) => (
-              <SkillCard
-                key={skill.title}
-                icon={skill.icon}
-                title={skill.title}
-                description={skill.description}
-                index={i}
-              />
-            ))}
+            <motion.dl
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.5 }}
+              transition={reduced ? { duration: 0 } : { duration: 0.6, ease: EASE }}
+              className="overflow-hidden rounded-2xl border border-smoke bg-white shadow-[0_16px_50px_-30px_rgba(0,0,0,0.5)]"
+            >
+              {facts.map(([label, value], i) => (
+                <div
+                  key={label}
+                  className={`flex items-baseline justify-between gap-4 px-4 py-2.5 md:px-5 md:py-3 ${
+                    i === 0 ? "" : "border-t border-smoke"
+                  }`}
+                >
+                  <dt className="shrink-0 font-mono text-[0.6rem] uppercase tracking-[0.18em] text-slate">
+                    {label}
+                  </dt>
+                  <dd className="text-right text-[0.78rem] font-bold leading-snug text-black md:text-sm">
+                    {value}
+                  </dd>
+                </div>
+              ))}
+            </motion.dl>
+
+            <motion.a
+              href={site.resume.href}
+              download
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.5 }}
+              transition={reduced ? { duration: 0 } : { duration: 0.6, delay: 0.12, ease: EASE }}
+              whileHover={{ y: -2 }}
+              className="mt-3 inline-flex items-center justify-center gap-2.5 rounded-2xl bg-signal px-5 py-3.5 font-mono text-[0.7rem] font-bold uppercase tracking-[0.18em] text-white transition-colors duration-200 hover:bg-black"
+            >
+              <Download size={14} strokeWidth={2.6} />
+              Résumé
+              <span className="font-normal normal-case tracking-normal text-white/80">
+                {site.resume.meta}
+              </span>
+            </motion.a>
           </div>
         </motion.div>
       </div>

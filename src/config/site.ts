@@ -32,6 +32,12 @@ export const site = {
    * cut from your own bio in the About section, so the preview under your name
    * on Google, WhatsApp or LinkedIn matches what the page itself says.
    */
+  /** The CV, served straight from /public. */
+  resume: {
+    href: '/Koushik-Gopathi-Resume.pdf',
+    meta: 'PDF · 99 KB',
+  },
+
   meta: {
     title: 'Koushik Gopathi — Developer & Designer',
     shortName: 'Koushik Gopathi',

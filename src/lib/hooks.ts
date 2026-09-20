@@ -15,16 +15,15 @@ const REDUCE_QUERY = '(prefers-reduced-motion: reduce)'
  * `reduced ? … : …` branch downstream then silently takes the animated path
  * and the setting does nothing at all.
  *
- * This reads matchMedia in a lazy `useState` initialiser instead, so it is
- * `false` on the server and correct from the client's very first render.
- * Nothing that depends on it may reach the SSR markup — see the note on
- * `initial` in the motion components — but transitions and effects are free to
- * use it immediately.
+ * It deliberately reports `false` until after mount, matching the server, and
+ * only then reads matchMedia. A lazy `useState` initialiser looks tidier and
+ * is a hydration bug: the server cannot run matchMedia, so it renders the
+ * animated tree while the client's very first render builds the reduced one,
+ * and React throws #418 for every visitor who asked for less motion. Costing
+ * those visitors one animated frame is the correct trade.
  */
 export function usePrefersReducedMotion() {
-  const [reduced, setReduced] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia(REDUCE_QUERY).matches,
-  )
+  const [reduced, setReduced] = useState(false)
 
   useEffect(() => {
     const mq = window.matchMedia(REDUCE_QUERY)
@@ -38,15 +37,12 @@ export function usePrefersReducedMotion() {
 }
 
 /**
- * Whether a media query matches. Same lazy-initialiser pattern as
- * `usePrefersReducedMotion`, so it is right from the first client render and
- * `false` on the server. Use it for animation values, never for markup that
- * has to match the server render.
+ * Whether a media query matches. Resolves after mount, like
+ * `usePrefersReducedMotion`, so server and client agree on the first render.
  */
 export function useMediaQuery(query: string) {
-  const [matches, setMatches] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia(query).matches,
-  )
+  // `false` first, for the same hydration reason as above.
+  const [matches, setMatches] = useState(false)
 
   useEffect(() => {
     const mq = window.matchMedia(query)

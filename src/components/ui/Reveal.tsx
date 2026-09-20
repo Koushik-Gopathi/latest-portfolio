@@ -1,6 +1,7 @@
 "use client";
 
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
+import { usePrefersReducedMotion } from "@/lib/hooks";
 import type { Variants } from "framer-motion";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -31,7 +32,7 @@ export function MaskText({
   stagger?: number;
   duration?: number;
 }) {
-  const reduced = useReducedMotion();
+  const reduced = usePrefersReducedMotion();
   const words = text.split(" ");
 
   if (reduced) return <span className={className}>{text}</span>;
@@ -90,7 +91,7 @@ export function Reveal({
   amount?: number;
   duration?: number;
 }) {
-  const reduced = useReducedMotion();
+  const reduced = usePrefersReducedMotion();
   if (reduced) return <div className={className}>{children}</div>;
 
   return (
@@ -108,13 +109,13 @@ export function Reveal({
 
 /** A thin rule that draws itself across as the section arrives. */
 export function DrawRule({ className = "", delay = 0 }: { className?: string; delay?: number }) {
-  const reduced = useReducedMotion();
+  const reduced = usePrefersReducedMotion();
   return (
     <motion.div
-      initial={reduced ? undefined : { scaleX: 0 }}
-      whileInView={reduced ? undefined : { scaleX: 1 }}
+      initial={{ scaleX: 0 }}
+      whileInView={{ scaleX: 1 }}
       viewport={{ once: true, amount: 0.6 }}
-      transition={{ duration: 1.1, delay, ease: EASE }}
+      transition={reduced ? { duration: 0 } : { duration: 1.1, delay, ease: EASE }}
       style={{ transformOrigin: "left" }}
       className={`h-px w-full ${className}`}
     />

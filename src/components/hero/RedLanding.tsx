@@ -7,9 +7,9 @@ import {
   useTransform,
   useMotionValue,
   animate as animateValue,
-  useReducedMotion,
   MotionValue,
 } from "framer-motion";
+import { usePrefersReducedMotion } from "@/lib/hooks";
 
 const COLS = 5;
 const ROWS = 4;
@@ -141,7 +141,7 @@ function Furniture({ scrollY }: { scrollY: MotionValue<number> }) {
           initial={{ opacity: 0, letterSpacing: "0.7em" }}
           animate={{ opacity: 1, letterSpacing: "0.34em" }}
           transition={{ duration: 1.3, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-          className="font-mono text-[0.6rem] uppercase text-white/80 md:text-xs"
+          className="font-mono text-[0.6rem] uppercase text-white md:text-xs"
         >
           Developer / Designer
         </motion.p>
@@ -151,7 +151,7 @@ function Furniture({ scrollY }: { scrollY: MotionValue<number> }) {
         style={{ opacity }}
         className="absolute inset-x-0 bottom-10 z-20 flex flex-col items-center gap-3"
       >
-        <span className="font-mono text-[0.6rem] uppercase tracking-[0.3em] text-white/70">Scroll</span>
+        <span className="font-mono text-[0.6rem] uppercase tracking-[0.3em] text-white">Scroll</span>
         {/* A 56px rail with a bead falling down it, on a loop. Cheaper and
             calmer than a bouncing chevron, and it reads as a direction. */}
         <span className="relative h-14 w-px overflow-hidden bg-white/30">
@@ -168,7 +168,7 @@ function Furniture({ scrollY }: { scrollY: MotionValue<number> }) {
 
 export default function RedLanding() {
   const { scrollY } = useScroll();
-  const reduced = useReducedMotion();
+  const reduced = usePrefersReducedMotion();
 
   // Once the plate is gone it must stop intercepting anything and stop
   // compositing twenty transformed layers over the rest of the document.
@@ -182,7 +182,7 @@ export default function RedLanding() {
       <section className="fx-grain relative flex h-screen w-full items-center justify-center bg-signal">
         <div aria-hidden className="fx-dots pointer-events-none absolute inset-0 text-white/20" />
         <div className="relative z-10 text-center">
-          <p className="mb-5 font-mono text-[0.6rem] uppercase tracking-[0.34em] text-white/80 md:text-xs">
+          <p className="mb-5 font-mono text-[0.6rem] uppercase tracking-[0.34em] text-white md:text-xs">
             Developer / Designer
           </p>
           <h1 className="flex justify-center text-[clamp(1.25rem,7.4vw,3rem)] font-black uppercase tracking-widest text-white">

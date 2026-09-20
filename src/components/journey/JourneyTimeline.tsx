@@ -1,9 +1,9 @@
 "use client";
 
 import { useRef, useState, useLayoutEffect } from "react";
-import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 import TiltCard from "@/components/ui/TiltCard";
-import { useMediaQuery } from "@/lib/hooks";
+import { useMediaQuery, usePrefersReducedMotion } from "@/lib/hooks";
 import { MaskText } from "@/components/ui/Reveal";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
@@ -50,7 +50,7 @@ const journey = [
 
 /** The dot, plus the ring it throws off at the moment it lands. */
 function TimelineNode() {
-  const reduced = useReducedMotion();
+  const reduced = usePrefersReducedMotion();
 
   return (
     <div className="relative h-4 w-4">
@@ -65,10 +65,10 @@ function TimelineNode() {
         />
       )}
       <motion.div
-        initial={reduced ? undefined : { scale: 0 }}
-        whileInView={reduced ? undefined : { scale: 1 }}
+        initial={{ scale: 0 }}
+        whileInView={{ scale: 1 }}
         viewport={{ once: true, amount: 0.6 }}
-        transition={{ duration: 0.45, ease: EASE }}
+        transition={reduced ? { duration: 0 } : { duration: 0.45, ease: EASE }}
         className="relative h-4 w-4 rounded-full bg-signal ring-4 ring-white"
       />
     </div>
@@ -76,6 +76,7 @@ function TimelineNode() {
 }
 
 export default function MyJourney() {
+  const reduced = usePrefersReducedMotion();
   const trackRef = useRef<HTMLDivElement>(null);
   const nodeRefs = useRef<(HTMLDivElement | null)[]>([]);
   // A full-width card tilted 3deg pokes its corners out of a phone screen.
@@ -177,11 +178,11 @@ export default function MyJourney() {
 
               <motion.path
                 d={pathD}
-                stroke="#ff0000"
+                stroke="#ee0000"
                 strokeWidth={2.5}
                 fill="none"
                 strokeLinecap="round"
-                style={{ pathLength, filter: "drop-shadow(0 0 6px rgba(255,0,0,0.45))" }}
+                style={{ pathLength, filter: "drop-shadow(0 0 6px rgba(238,0,0,0.45))" }}
               />
             </svg>
           )}
@@ -189,7 +190,9 @@ export default function MyJourney() {
           <div className="flex flex-col gap-12 md:gap-16 lg:gap-32">
             {journey.map((item, index) => {
               const isLeft = index % 2 === 0;
-              const tilt = (isLeft ? -1 : 1) * (isWide ? 3 : 1);
+              // A tilt is motion in the finished state, not just on the way
+              // in, so reduced motion gets a card that sits straight.
+              const tilt = reduced ? 0 : (isLeft ? -1 : 1) * (isWide ? 3 : 1);
 
               return (
                 <div
@@ -214,8 +217,8 @@ export default function MyJourney() {
                     whileInView={{ opacity: 1, y: 0, scale: 1, rotate: tilt }}
                     whileHover={{ rotate: 0, scale: 1.02 }}
                     viewport={{ once: true, amount: 0.4 }}
-                    transition={{ duration: 0.6, ease: EASE }}
-                    className={`fx-spotlight fx-spotlight-light fx-grain group relative w-full overflow-hidden rounded-3xl bg-signal p-8 text-white shadow-xl md:p-10 lg:w-[46%] ${
+                    transition={reduced ? { duration: 0 } : { duration: 0.6, ease: EASE }}
+                    className={`fx-spotlight fx-spotlight-light fx-grain group relative w-full overflow-hidden rounded-3xl bg-signal-deep p-8 text-white shadow-xl md:p-10 lg:w-[46%] ${
                       isLeft ? "lg:mr-auto" : "lg:ml-auto"
                     }`}
                   >
@@ -231,7 +234,7 @@ export default function MyJourney() {
                       <span className="rounded-full border border-white/30 bg-white/10 px-3 py-1 font-mono text-xs font-bold uppercase tracking-widest transition-colors duration-300 group-hover:bg-white group-hover:text-signal">
                         {item.phase}
                       </span>
-                      <span className="font-mono text-xs text-white/70">{item.year}</span>
+                      <span className="font-mono text-xs text-white">{item.year}</span>
                     </div>
 
                     <h3 className="relative z-10 mb-4 text-2xl font-black uppercase tracking-tight md:text-3xl">
@@ -246,7 +249,7 @@ export default function MyJourney() {
                           whileInView={{ opacity: 1, x: 0 }}
                           viewport={{ once: true, amount: 0.4 }}
                           transition={{ duration: 0.5, delay: 0.25 + i * 0.09, ease: EASE }}
-                          className="flex gap-2 text-sm leading-relaxed text-white/90 md:text-base"
+                          className="flex gap-2 text-sm leading-relaxed text-white md:text-base"
                         >
                           <span aria-hidden className="text-white/60">
                             —

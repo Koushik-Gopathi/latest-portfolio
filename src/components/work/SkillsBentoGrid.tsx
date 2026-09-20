@@ -1,7 +1,8 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { motion, useScroll, useTransform, useReducedMotion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
+import { usePrefersReducedMotion } from "@/lib/hooks";
 import type { Variants } from "framer-motion";
 import { ShieldCheck, CodeXml, Smartphone, Palette } from "lucide-react";
 import { MaskText, DrawRule } from "@/components/ui/Reveal";
@@ -14,15 +15,15 @@ const skillCategories = [
     icon: ShieldCheck,
     title: "Cybersecurity & Systems",
     subtitle: "Core Engineering & Security Lab",
-    description: "Hands-on threat analysis, secure system setups, and fundamental architecture.",
-    skills: ["Kali Linux", "SeedLabs", "Operating Systems", "DBMS"],
+    description: "Where the degree points. Threat analysis in SeedLabs, hardened Linux setups, and the web-vulnerability classes I went on to detect automatically in GuardianMesh.",
+    skills: ["Kali Linux", "SeedLabs", "Prompt-injection detection", "Operating Systems", "DBMS"],
   },
   {
     number: "02",
     icon: CodeXml,
     title: "Web Development",
     subtitle: "Frontend Architecture",
-    description: "Crafting fast, modern, and responsive web applications with clean design patterns.",
+    description: "The PERN stack end to end. I co-built LogBook, an attendance and scheduling platform my college runs on, and this site is Next.js and Framer Motion.",
     skills: ["React.js", "Next.js", "Express.js", "JavaScript", "HTML/CSS", "Framer Motion"],
   },
   {
@@ -30,7 +31,7 @@ const skillCategories = [
     icon: Smartphone,
     title: "App Development",
     subtitle: "Cross-Platform Solutions",
-    description: "Building native-feeling mobile applications and smooth interactive user experiences.",
+    description: "Flutter in production: an offline amblyopia screening app under faculty guidance, an attendance tracker shipping through GitHub Actions, and Karen's Android client.",
     skills: ["Flutter", "Dart", "Mobile UI Design"],
   },
   {
@@ -38,8 +39,8 @@ const skillCategories = [
     icon: Palette,
     title: "Design & DevOps Tools",
     subtitle: "Workflow & Craft",
-    description: "Translating concepts into high-fidelity interfaces and managing deployment pipelines.",
-    skills: ["Figma", "UI/UX Design", "Git & GitHub"],
+    description: "Designing the interface before writing it, then owning the pipeline — Git, GitHub Actions and CI that deploys on push.",
+    skills: ["Figma", "UI/UX Design", "Git & GitHub", "GitHub Actions"],
   },
 ];
 
@@ -51,6 +52,13 @@ const tagGroup: Variants = {
 const tagItem: Variants = {
   hidden: { opacity: 0, y: 12 },
   show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: EASE } },
+};
+
+/** Reduced motion: same end states, no travel and no stagger. */
+const tagGroupInstant: Variants = { hidden: {}, show: {} };
+const tagItemInstant: Variants = {
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { duration: 0 } },
 };
 
 function SkillRow({
@@ -68,16 +76,16 @@ function SkillRow({
   onPin: () => void;
   onLeave: () => void;
 }) {
-  const reduced = useReducedMotion();
+  const reduced = usePrefersReducedMotion();
   const Icon = category.icon;
   const panelId = `skill-panel-${category.number}`;
 
   return (
     <motion.div
-      initial={reduced ? undefined : { opacity: 0, x: -40 }}
-      whileInView={reduced ? undefined : { opacity: 1, x: 0 }}
+      initial={{ opacity: 0, x: -40 }}
+      whileInView={{ opacity: 1, x: 0 }}
       viewport={{ once: true, amount: 0.4 }}
-      transition={{ duration: 0.7, delay: index * 0.08, ease: EASE }}
+      transition={reduced ? { duration: 0 } : { duration: 0.7, delay: index * 0.08, ease: EASE }}
       onPointerEnter={(e) => {
         // Hover opens the row on a mouse. Touch gets the tap handler instead,
         // or the panel would open and close under the same thumb.
@@ -175,15 +183,15 @@ function SkillRow({
           </div>
 
           <motion.div
-            variants={tagGroup}
-            initial={reduced ? undefined : "hidden"}
-            animate={reduced ? undefined : isActive ? "show" : "hidden"}
+            variants={reduced ? tagGroupInstant : tagGroup}
+            initial="hidden"
+            animate={isActive ? "show" : "hidden"}
             className="relative flex flex-wrap items-start content-start gap-2 lg:max-w-md lg:justify-end"
           >
             {category.skills.map((skill) => (
               <motion.span
                 key={skill}
-                variants={tagItem}
+                variants={reduced ? tagItemInstant : tagItem}
                 className="cursor-default rounded-xl border border-smoke bg-mist px-3 py-1.5 font-mono text-xs font-bold text-black transition-[transform,background-color,color,border-color] duration-200 hover:-translate-y-0.5 hover:border-signal hover:bg-signal hover:text-white"
               >
                 {skill}
@@ -249,7 +257,8 @@ export default function SkillsBentoGrid() {
               transition={{ duration: 0.7, delay: 0.35, ease: EASE }}
               className="flex shrink-0 items-center gap-2 font-mono text-xs uppercase tracking-[0.28em] text-white/70"
             >
-              Hover to open
+              <span className="fx-hover-only">Hover to open</span>
+              <span className="fx-touch-only">Tap to open</span>
               <span
                 aria-hidden
                 className="inline-block h-3 w-1.5 bg-white"

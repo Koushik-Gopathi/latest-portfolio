@@ -36,7 +36,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   // The first thing the visitor sees is the full-bleed red landing, so the
   // browser chrome is red too — not the old paper stock.
-  themeColor: '#ff0000',
+  themeColor: '#ee0000',
   colorScheme: 'light',
 }
 
@@ -56,10 +56,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <SmoothScroll />
         <Cursor />
         <a
-          href="#intro"
+          href="#work"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:bg-ink focus:px-4 focus:py-2 focus:text-paper"
         >
-          Skip to content
+          Skip to work
         </a>
         {children}
       </body>

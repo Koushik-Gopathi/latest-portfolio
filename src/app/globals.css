@@ -803,7 +803,7 @@
    Named here once so a section never hard-codes #FF0000 again.
    =========================================================================== */
 @theme {
-  --color-signal: #ff0000;
+  --color-signal: #ee0000;
   /* Pressed / active red. Darker, never browner. */
   --color-signal-deep: #d10000;
   /* For text on white where pure red would vibrate. */
@@ -877,7 +877,7 @@
     transition: opacity 0.4s ease;
     background: radial-gradient(
       340px circle at var(--mx) var(--my),
-      rgba(255, 0, 0, 0.16),
+      rgba(238, 0, 0, 0.16),
       transparent 62%
     );
   }
@@ -1024,14 +1024,19 @@
     }
   }
 
-  /* Card descriptions only where there is height to spare. The titles and
-     icons stay; the Skills section further down says the rest. */
-  .about-card-desc {
+  /* Copy that only makes sense for one input. "Hover to open" is a lie on a
+     touch screen; the pair below swaps it for "Tap to open" by capability
+     rather than by screen width, since a small laptop has a mouse and a big
+     tablet does not. */
+  .fx-touch-only {
     display: none;
   }
-  @media (min-width: 768px) and (min-height: 640px), (min-height: 780px) {
-    .about-card-desc {
-      display: block;
+  @media (hover: none) {
+    .fx-hover-only {
+      display: none;
+    }
+    .fx-touch-only {
+      display: inline;
     }
   }
 
@@ -1057,6 +1062,56 @@
   @media (max-height: 360px) {
     .about-cards {
       display: none;
+    }
+  }
+}
+
+/* PROJECT CARDS — SIZED BY THE SCREEN THEY SIT ON
+   The rail is pinned to one screen, so a card taller than that screen loses
+   its links off the bottom. Heights live here rather than in Tailwind classes
+   because only CSS can answer to viewport HEIGHT, and a `h-*` utility in a
+   later cascade layer would beat these rules anyway. */
+@layer components {
+  .project-card {
+    height: 440px;
+  }
+  .project-desc {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    overflow: hidden;
+  }
+
+  @media (min-width: 640px) {
+    .project-card {
+      height: 470px;
+    }
+  }
+  @media (min-width: 768px) {
+    .project-card {
+      height: 510px;
+    }
+  }
+
+  /* A phone on its side is wide enough for the desktop type scale and far too
+     short for the card: drop the screenshot, tighten the copy, and let the
+     title, tag and links keep their room. */
+  @media (max-height: 560px) {
+    .project-card {
+      height: 70vh;
+      padding: 0.9rem 1.1rem;
+    }
+    .project-media {
+      display: none;
+    }
+    .project-desc {
+      -webkit-line-clamp: 2;
+    }
+    .project-head {
+      margin-bottom: 0.75rem;
+    }
+    .project-rail {
+      margin-top: 0.75rem;
     }
   }
 }

@@ -5,6 +5,7 @@ import WorkspaceShowcase from "@/components/work/WorkspaceShowcase";
 import ProjectShowcase from "@/components/work/ProjectsHorizontalScroll";
 import SkillsBentoGrid from "@/components/work/SkillsBentoGrid";
 import JourneyTimeline from "@/components/journey/JourneyTimeline";
+import Education from "@/components/education/Education";
 import ConnectCTA from "@/components/footer/ConnectCTA";
 
 export default function Home() {
@@ -19,6 +20,7 @@ export default function Home() {
       <ProjectShowcase />
       <SkillsBentoGrid />
       <JourneyTimeline />
+      <Education />
       <ConnectCTA />
     </main>
   );
