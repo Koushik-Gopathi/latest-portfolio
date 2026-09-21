@@ -12,7 +12,7 @@ const education = [
     degree: "B.Tech, CSE (Cyber Security)",
     place: "Amrita Vishwa Vidyapeetham, Amritapuri",
     score: "CGPA 7.61 / 10",
-    years: "2024 — 2028 (expected)",
+    years: "2024 — 2028",
     current: true,
   },
   {
