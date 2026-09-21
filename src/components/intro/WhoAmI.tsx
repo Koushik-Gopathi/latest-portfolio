@@ -5,6 +5,7 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { Download } from "lucide-react";
 import { useMediaQuery, usePrefersReducedMotion } from "@/lib/hooks";
 import { site } from "@/config/site";
+import GlitchText from "@/components/ui/GlitchText";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -150,11 +151,10 @@ export default function WhoAmI() {
           style={{ opacity: contentOpacity, y: contentY }}
           className="relative mx-auto grid w-full max-w-5xl grid-cols-1 items-center gap-6 px-2 sm:px-4 md:grid-cols-2 md:gap-16"
         >
-          {/* Left: the bio, typed out. The caret stays after the last
-              character, because a typewriter that loses its cursor the instant
-              it finishes stops reading as one. The hover-scramble that used to
-              sit on these words is gone: turning the one paragraph that
-              explains you into gibberish is a toy fighting the reader. */}
+          {/* Left: the bio, typed out. Once it has finished, each word
+              scrambles when the pointer passes over it. The caret stays after
+              the last character, because a typewriter that loses its cursor
+              the instant it finishes stops reading as one. */}
           <div className="text-left">
             <p className="about-bio relative font-medium text-black">
               <span className="sr-only">{shortBio}</span>
@@ -168,7 +168,13 @@ export default function WhoAmI() {
               </span>
 
               <span aria-hidden className="absolute inset-0">
-                {typingDone ? shortBio : typedBio}
+                {typingDone
+                  ? shortBio.split(" ").map((word, i) => (
+                      <span key={i}>
+                        <GlitchText text={word} className="transition-colors duration-200 hover:text-signal" />{" "}
+                      </span>
+                    ))
+                  : typedBio}
                 <span
                   className="ml-0.5 inline-block h-[1.05em] w-[0.5ch] translate-y-[0.16em] bg-signal"
                   style={{ animation: "fx-blink 1.05s steps(1) infinite" }}

@@ -4,44 +4,7 @@ import { useState, useRef } from "react";
 import { motion, useMotionValue, useSpring } from "framer-motion";
 import { Mail, Phone, Copy, Check, ArrowUpRight } from "lucide-react";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/BrandIcons";
-
-const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%&*_";
-
-function GlitchText({ text, className = "" }: { text: string; className?: string }) {
-  const [displayText, setDisplayText] = useState(text);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
-
-  const scramble = () => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    let frame = 0;
-    const totalFrames = Math.max(10, text.length * 2.5);
-    intervalRef.current = setInterval(() => {
-      frame++;
-      if (frame >= totalFrames) {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-        setDisplayText(text);
-        return;
-      }
-      setDisplayText(
-        text
-          .split("")
-          .map((ch) => (ch === " " ? " " : LETTERS[Math.floor(Math.random() * LETTERS.length)]))
-          .join("")
-      );
-    }, 40);
-  };
-
-  const stop = () => {
-    if (intervalRef.current) clearInterval(intervalRef.current);
-    setDisplayText(text);
-  };
-
-  return (
-    <span onMouseEnter={scramble} onMouseLeave={stop} className={`cursor-pointer inline-block ${className}`}>
-      {displayText}
-    </span>
-  );
-}
+import GlitchText from "@/components/ui/GlitchText";
 
 // Button that subtly follows the cursor within its own bounds ("magnetic" feel)
 function MagneticButton({ children, className = "" }: { children: React.ReactNode; className?: string }) {
