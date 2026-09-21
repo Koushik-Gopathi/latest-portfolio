@@ -64,7 +64,8 @@ const projects: Project[] = [
       "Offline, touchless, voice-driven amblyopia screening that runs entirely on a health worker's smartphone. Implemented and calibrated the Hirschberg corneal-reflex test with ML Kit face mesh.",
     tag: "Flutter / ML Kit / TFLite",
     stats: ["4 screening tests", "Fully offline", "Clinical validation next"],
-    code: "https://github.com/Koushik-Gopathi/Ambyo-AI",
+    // A faculty project still in development: no source link.
+    note: "Faculty project in development — source private",
   },
   {
     title: "GuardianMesh",
