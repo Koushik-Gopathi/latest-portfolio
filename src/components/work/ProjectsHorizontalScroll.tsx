@@ -12,7 +12,8 @@ import {
   useMotionValueEvent,
 } from "framer-motion";
 import { usePrefersReducedMotion } from "@/lib/hooks";
-import { ArrowUpRight, Lock } from "lucide-react";
+import { ArrowUpRight, Lock, Play } from "lucide-react";
+import VideoModal, { type DemoVideo } from "@/components/ui/VideoModal";
 import { GithubIcon } from "@/components/ui/BrandIcons";
 import { MaskText, DrawRule } from "@/components/ui/Reveal";
 
@@ -25,6 +26,10 @@ type Project = {
   tag: string;
   /** A screenshot of the thing actually running. */
   shot?: string;
+  /** Which part of the screenshot the thin card frame should keep. */
+  shotPosition?: string;
+  /** A walkthrough, opened over the page. */
+  video?: DemoVideo;
   /** Shown in place of a screenshot: three facts, not a placeholder image. */
   stats?: string[];
   /** Flagship cards get a wider frame and room for what makes them different. */
@@ -42,6 +47,8 @@ const projects: Project[] = [
     description:
       "A hands-free voice agent that plans steps, calls the right tools, checks each result and keeps going until the job is done — PowerShell, files, documents, web search, and a paired Android phone.",
     tag: "Python / Flutter / LLM",
+    shot: "/assets/projects/karen.webp",
+    shotPosition: "50% 40%",
     stats: ["40+ tools", "~1s to first word", "EN · TE · HI"],
     highlights: [
       "Speaks while thinking: sentence-level TTS as the model streams",
@@ -66,6 +73,12 @@ const projects: Project[] = [
       "Threat detection for AI/MCP interactions: prompt injection, command and SQL injection, XSS, credential and SSH-key leaks, phishing and supply-chain URLs — scored 0–100 with confidence and an explanation.",
     tag: "TypeScript / React",
     shot: "/assets/projects/guardianmesh.webp",
+    video: {
+      src: "/assets/projects/guardianmesh-demo.mp4",
+      poster: "/assets/projects/guardianmesh-demo-poster.webp",
+      title: "GuardianMesh — walkthrough",
+      duration: "1:22",
+    },
     code: "https://github.com/Koushik-Gopathi/gaurdianmesh-threat-detection",
     live: "https://gaurdianmesh-threat-detection.onrender.com/dashboard",
   },
@@ -91,16 +104,25 @@ const projects: Project[] = [
   {
     title: "NASA APOD Explorer",
     category: "Web Development",
-    description: "A web app exploring NASA's daily astronomy data and imagery.",
-    tag: "React / NASA API",
-    stats: ["Public API", "Daily imagery", "React"],
+    description:
+      "React front end for NASA's Astronomy Picture of the Day API: each day's image with its title, date and explanation, and a way to step back through the archive.",
+    tag: "React / Vite / NASA API",
+    shot: "/assets/projects/nasa-apod.webp",
+    shotPosition: "50% 42%",
+    code: "https://github.com/Koushik-Gopathi/WebSIG-S4-Recruitment/tree/main/Task-3-React-Frontend",
+    live: "https://koushik-nasa-apod.netlify.app",
   },
   {
     title: "Task Manager",
-    category: "Web App",
-    description: "Productivity app for managing daily tasks and workflows.",
-    tag: "React / Next.js",
-    stats: ["Task workflows", "Published", "React"],
+    category: "Web App · Full-stack",
+    description:
+      "Full-stack task manager: sign-up and login with Firebase Auth, protected routes, and per-user tasks in Firestore that update in real time.",
+    tag: "React / Firebase",
+    // The live app opens on a login screen, so three facts say more than a
+    // screenshot of an empty form would.
+    stats: ["Firebase Auth", "Real-time Firestore", "Protected routes"],
+    code: "https://github.com/Koushik-Gopathi/WebSIG-S4-Recruitment/tree/main/Task-5-Fullstack",
+    live: "https://want-to-do.netlify.app/",
   },
 ];
 
@@ -166,12 +188,14 @@ function ProjectCard({
   isHovered,
   onEnter,
   onLeave,
+  onPlay,
 }: {
   project: Project;
   index: number;
   isHovered: boolean;
   onEnter: () => void;
   onLeave: () => void;
+  onPlay: (video: DemoVideo) => void;
 }) {
   const reduced = usePrefersReducedMotion();
   const wide = Boolean(project.highlights);
@@ -210,16 +234,45 @@ function ProjectCard({
             as a missing image. */}
         <div className="project-media relative mb-4 h-24 shrink-0 overflow-hidden rounded-2xl sm:h-28 md:h-36">
           {project.shot ? (
-            <Image
-              src={project.shot}
-              alt={`${project.title} interface`}
-              width={1280}
-              height={800}
-              sizes="(max-width: 768px) 82vw, 560px"
-              className="h-full w-full object-cover object-top"
-            />
+            <>
+              <Image
+                src={project.shot}
+                alt={`${project.title} interface`}
+                width={1280}
+                height={800}
+                sizes="(max-width: 768px) 82vw, 560px"
+                style={{ objectPosition: project.shotPosition ?? "50% 0%" }}
+                className="h-full w-full object-cover"
+              />
+              {/* A screenshot and its facts together: the facts sit on a
+                  gradient at the foot of the image. */}
+              {project.stats && (
+                <div className="absolute inset-x-0 bottom-0 flex flex-wrap gap-x-3 gap-y-0.5 bg-gradient-to-t from-black/85 to-transparent px-3 pb-2 pt-6 text-white">
+                  {project.stats.map((s) => (
+                    <span key={s} className="font-mono text-[0.6rem] uppercase tracking-[0.16em]">
+                      {s}
+                    </span>
+                  ))}
+                </div>
+              )}
+              {project.video && (
+                <button
+                  type="button"
+                  onClick={() => onPlay(project.video!)}
+                  aria-label={`Play ${project.video.title} (${project.video.duration})`}
+                  className="group/play absolute inset-0 flex items-center justify-center bg-black/25 transition-colors duration-200 hover:bg-black/45"
+                >
+                  <span className="flex items-center gap-2 rounded-full bg-white py-2 pl-3 pr-4 font-mono text-[0.66rem] font-bold uppercase tracking-wider text-black shadow-xl transition-transform duration-200 group-hover/play:scale-105">
+                    <span className="grid h-6 w-6 place-items-center rounded-full bg-signal text-white">
+                      <Play size={11} fill="currentColor" />
+                    </span>
+                    Watch demo · {project.video.duration}
+                  </span>
+                </button>
+              )}
+            </>
           ) : (
-            <div className="fx-dots flex h-full w-full flex-col justify-center gap-1 bg-signal-deep px-4 text-white/95">
+            <div className="fx-dots flex h-full w-full flex-col justify-center gap-1 bg-signal-deep px-4 text-white">
               {project.stats?.map((s) => (
                 <span key={s} className="font-mono text-[0.68rem] uppercase tracking-[0.18em]">
                   {s}
@@ -347,6 +400,7 @@ export default function ProjectsHorizontalScroll() {
   // Hover is tracked in state rather than with CSS :hover, so it stays right
   // while cards slide under a stationary cursor.
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  const [playing, setPlaying] = useState<DemoVideo | null>(null);
 
   return (
     <section id="work" ref={targetRef} className="relative z-30 h-[300vh] bg-white text-black">
@@ -385,6 +439,7 @@ export default function ProjectsHorizontalScroll() {
                 isHovered={hoveredIndex === index}
                 onEnter={() => setHoveredIndex(index)}
                 onLeave={() => setHoveredIndex((c) => (c === index ? null : c))}
+                onPlay={setPlaying}
               />
             ))}
           </motion.div>
@@ -398,6 +453,8 @@ export default function ProjectsHorizontalScroll() {
           />
         </div>
       </div>
+
+      <VideoModal video={playing} onClose={() => setPlaying(null)} />
     </section>
   );
 }

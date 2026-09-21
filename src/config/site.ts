@@ -35,7 +35,7 @@ export const site = {
   /** The CV, served straight from /public. */
   resume: {
     href: '/Koushik-Gopathi-Resume.pdf',
-    meta: 'PDF · 99 KB',
+    meta: 'PDF · 82 KB',
   },
 
   meta: {

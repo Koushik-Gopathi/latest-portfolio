@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import Lenis from 'lenis'
+import { registerLenis } from '@/lib/lenis'
 
 /**
  * Weighted scrolling. The whole conceit of the site is that you are handling
@@ -20,6 +21,9 @@ export default function SmoothScroll() {
       touchMultiplier: 1.6,
       autoRaf: false,
     })
+
+    // So a modal can pause the page while it is open.
+    registerLenis(lenis)
 
     let frame = 0
     const loop = (time: number) => {
@@ -51,6 +55,7 @@ export default function SmoothScroll() {
     return () => {
       document.removeEventListener('click', onClick)
       cancelAnimationFrame(frame)
+      registerLenis(null)
       lenis.destroy()
     }
   }, [])
