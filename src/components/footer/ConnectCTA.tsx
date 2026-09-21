@@ -108,12 +108,12 @@ function CopyableRow({
         onClick={!href ? handleCopy : undefined}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
-        className="fx-spotlight fx-spotlight-light fx-sheen group relative flex w-full cursor-pointer items-center justify-between overflow-hidden rounded-2xl border border-white/25 bg-signal-deep px-6 py-5 text-white transition-colors duration-300 hover:border-white hover:bg-white hover:text-signal md:px-8 md:py-6"
+        className="fx-spotlight fx-sheen group relative flex w-full cursor-pointer items-center justify-between overflow-hidden rounded-2xl border border-smoke bg-white px-6 py-5 text-black shadow-[0_10px_30px_-22px_rgba(0,0,0,0.45)] transition-colors duration-300 hover:border-signal hover:bg-signal hover:text-white md:px-8 md:py-6"
       >
         <div className="relative z-10 flex min-w-0 items-center gap-4 md:gap-5">
-          <span className="shrink-0">{icon}</span>
+          <span className="shrink-0 text-signal transition-colors duration-300 group-hover:text-white">{icon}</span>
           <div className="min-w-0 text-left">
-            <p className="text-xs font-mono uppercase tracking-widest opacity-80 mb-1">{label}</p>
+            <p className="text-xs font-mono uppercase tracking-widest mb-1 text-slate transition-colors duration-300 group-hover:text-white">{label}</p>
             <p className="text-base md:text-xl font-bold tracking-tight [overflow-wrap:anywhere]">{value}</p>
           </div>
         </div>
@@ -141,7 +141,7 @@ function FloatingDots() {
       {dots.map((_, i) => (
         <motion.span
           key={i}
-          className="absolute rounded-full bg-white/10"
+          className="absolute rounded-full bg-signal/15"
           style={{
             width: 4 + (i % 3) * 4,
             height: 4 + (i % 3) * 4,
@@ -171,7 +171,7 @@ function FloatingDots() {
  */
 function FooterMarquee() {
   return (
-    <div className="relative z-10 mt-24 overflow-hidden border-t border-white/20 py-8">
+    <div className="relative z-10 mt-24 overflow-hidden border-t border-smoke py-8">
       <motion.div
         animate={{ x: ["0%", "-50%"] }}
         transition={{ duration: 22, ease: "linear", repeat: Infinity }}
@@ -180,7 +180,7 @@ function FooterMarquee() {
         {Array.from({ length: 4 }).map((_, i) => (
           <span
             key={i}
-            className="select-none px-6 text-[4rem] font-black uppercase leading-none tracking-tighter text-white md:text-[6rem]"
+            className="select-none px-6 text-[4rem] font-black uppercase leading-none tracking-tighter text-signal md:text-[6rem]"
           >
             Let&rsquo;s work together ·
           </span>
@@ -192,7 +192,7 @@ function FooterMarquee() {
 
 export default function ContactMe() {
   return (
-    <section className="fx-grain relative w-full overflow-hidden bg-signal px-6 pb-0 pt-20 text-white md:px-12 md:pt-32">
+    <section className="relative w-full overflow-hidden bg-white px-6 pb-0 pt-20 text-black md:px-12 md:pt-32">
       <FloatingDots />
 
       <div className="relative z-10 max-w-3xl mx-auto text-center">
@@ -201,7 +201,7 @@ export default function ContactMe() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-xs md:text-sm font-mono uppercase tracking-[0.3em] text-white mb-4"
+          className="text-xs md:text-sm font-mono uppercase tracking-[0.3em] text-signal mb-4"
         >
           Got a project in mind?
         </motion.p>
@@ -211,18 +211,8 @@ export default function ContactMe() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="relative mb-6 text-5xl font-black uppercase leading-none tracking-tighter md:text-8xl"
+          className="relative mb-6 text-5xl font-black uppercase leading-none tracking-tighter text-signal md:text-8xl"
         >
-          {/* The hollow copy sits a few pixels off the solid one, which gives
-              the scramble something to register against while it runs. */}
-          <span
-            aria-hidden
-            className="fx-outline pointer-events-none absolute left-1/2 top-0 -translate-x-1/2 translate-y-2 select-none whitespace-nowrap text-white/30"
-          >
-            LET&rsquo;S
-            <br />
-            CONNECT
-          </span>
           <span className="relative">
             <GlitchText text="LET'S" />
             <br />
@@ -235,7 +225,7 @@ export default function ContactMe() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="text-white text-sm md:text-base font-medium max-w-md mx-auto mb-14"
+          className="text-slate text-sm md:text-base font-medium max-w-md mx-auto mb-14"
         >
           Whether it's a project, an opportunity, or just to talk tech — my inbox is always open.
         </motion.p>
@@ -268,7 +258,7 @@ export default function ContactMe() {
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.6 }}
-          className="mt-16 font-mono text-xs text-white/90"
+          className="mt-16 font-mono text-xs text-slate"
         >
           © {new Date().getFullYear()} Koushik Gopathi
         </motion.p>

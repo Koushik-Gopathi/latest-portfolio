@@ -34,8 +34,9 @@ export default function WhoAmI() {
   // the full 70px lift pushed it off the top of a 640px phone.
   const roomy = useMediaQuery("(min-height: 760px)");
   const titleDrift = useTransform(scrollY, [750, 1500], [0, roomy ? -70 : -16]);
-  const titleScale = useTransform(scrollY, [600, 1500], [1.08, 0.94]);
   const ghostX = useTransform(scrollY, [600, 1600], [-40, 60]);
+  // How much of the solid word is showing over its outline.
+  const fillClip = useTransform(scrollY, [700, 1150], ["inset(0 100% 0 0)", "inset(0 0% 0 0)"]);
 
   const titleTotalY = useTransform([titleY, titleDrift], (v) => (v as number[])[0] + (v as number[])[1]);
 
@@ -130,24 +131,20 @@ export default function WhoAmI() {
           01 — About
         </span>
 
-        <div className="relative">
-          {/* The hollow twin sits behind the solid word and moves the other
-              way, which is what gives a single centred heading depth. */}
-          <motion.h2
+        {/* The outline is the real heading; the solid copy sits exactly on
+            top of it and is uncovered left to right as you scroll. */}
+        <motion.div style={{ opacity: titleOpacity, y: titleTotalY }} className="relative">
+          <h2 className="about-title fx-outline select-none whitespace-nowrap text-center font-black uppercase leading-none tracking-tighter text-signal [--fx-stroke:2px]">
+            WHO AM I?
+          </h2>
+          <motion.span
             aria-hidden
-            style={{ opacity: titleOpacity, y: titleDrift, x: ghostX, scale: titleScale }}
-            className="about-title fx-outline absolute inset-0 hidden select-none whitespace-nowrap text-center font-black uppercase leading-none tracking-tighter text-signal/40 [--fx-stroke:2px] md:block"
+            style={{ clipPath: reduced ? "inset(0 0% 0 0)" : fillClip }}
+            className="about-title absolute inset-0 select-none whitespace-nowrap text-center font-black uppercase leading-none tracking-tighter text-signal"
           >
             WHO AM I?
-          </motion.h2>
-
-          <motion.h2
-            style={{ opacity: titleOpacity, y: titleTotalY }}
-            className="about-title relative select-none whitespace-nowrap text-center font-black uppercase leading-none tracking-tighter text-signal"
-          >
-            WHO AM I?
-          </motion.h2>
-        </div>
+          </motion.span>
+        </motion.div>
 
         <motion.div
           style={{ opacity: contentOpacity, y: contentY }}

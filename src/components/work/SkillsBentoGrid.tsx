@@ -110,6 +110,7 @@ function SkillRow({
         type="button"
         onClick={onPin}
         onFocus={onHover}
+        onBlur={onLeave}
         aria-expanded={isActive}
         aria-controls={panelId}
         className="flex w-full cursor-pointer items-center gap-3 px-3 py-6 text-left sm:gap-4 sm:px-4 md:gap-8 md:px-6 md:py-7"
@@ -210,7 +211,7 @@ export default function SkillsBentoGrid() {
   // Which row is showing. `pinned` is what a click chose; a hover outranks it
   // while the pointer is on the list, so the list answers the mouse with no
   // click at all and falls back to the pinned row on the way out.
-  const [pinned, setPinned] = useState(0);
+  const [pinned, setPinned] = useState<number | null>(null);
   const [hovered, setHovered] = useState<number | null>(null);
   const active = hovered ?? pinned;
 
@@ -283,7 +284,7 @@ export default function SkillsBentoGrid() {
               isActive={active === index}
               onHover={() => setHovered(index)}
               onPin={() => {
-                setPinned(index);
+                setPinned((p) => (p === index ? null : index));
                 setHovered(index);
               }}
               onLeave={() => setHovered((h) => (h === index ? null : h))}
