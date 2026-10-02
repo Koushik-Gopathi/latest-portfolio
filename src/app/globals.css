@@ -1134,13 +1134,37 @@
     overflow: hidden;
   }
 
+  /* The picture carries the card, as in the reference; the words sit under
+     it. Heights are declared here because the fan and the stack want
+     different ones and a utility class cannot answer to both. */
+  .project-media {
+    height: 6rem;
+  }
+  @media (min-width: 640px) {
+    .project-media {
+      height: 7rem;
+    }
+  }
+
   .project-card--fan {
-    width: 300px;
-    height: 470px;
+    width: 272px;
+    height: 468px;
+  }
+  .project-card--fan .project-media {
+    height: 10.5rem;
+  }
+  /* Two lines under the picture: a fanned card is a glance, not a read. The
+     whole description is there the moment it is pulled to the front. */
+  .project-card--fan .project-desc {
+    -webkit-line-clamp: 2;
   }
   @media (min-width: 1280px) {
     .project-card--fan {
-      height: 486px;
+      width: 288px;
+      height: 496px;
+    }
+    .project-card--fan .project-media {
+      height: 11.5rem;
     }
   }
 

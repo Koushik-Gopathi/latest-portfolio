@@ -27,14 +27,25 @@ function slotOffset(index: number) {
 
 /** The fan's geometry, in one place. */
 const FAN = {
-  cardWidth: 300,
+  /** Portrait, like the reference: the picture leads, the words follow. */
+  cardWidth: 272,
   /** Horizontal gap between neighbours; clamped against the real container. */
-  stepMin: 96,
-  stepMax: 172,
+  stepMin: 84,
+  stepMax: 150,
   /** Degrees of lean per card away from the middle. */
-  tilt: 6.5,
-  /** How far the outer cards sink, giving the row its arc. */
-  dip: 13,
+  tilt: 7.5,
+  /**
+   * Rotation happens about a point below the deck, not each card's middle,
+   * which is what splays the tops apart into one arc — a hand of cards held
+   * at the bottom rather than seven separately spun rectangles.
+   */
+  origin: "50% 132%",
+  /** A little extra sink on the outer cards, on top of what the pivot gives. */
+  dip: 7,
+  /** Nominal card height, for working out how wide the fan wants to be. */
+  cardHeight: 480,
+  /** The stage's height at full size. */
+  stageHeight: 620,
 };
 
 type Project = {
@@ -240,8 +251,23 @@ function ProjectCard({
 
   const fanStyle = fan
     ? reduced
-      ? { x: offset * FAN.stepMax, rotate: tilt, y: dip, scale: rest, zIndex: isActive ? 100 : 50 - Math.round(away) }
-      : { x, rotate, y, scale, opacity, zIndex: isActive ? 100 : 50 - Math.round(away) }
+      ? {
+          x: offset * FAN.stepMax,
+          rotate: tilt,
+          y: dip,
+          scale: rest,
+          zIndex: isActive ? 100 : 50 - Math.round(away),
+          transformOrigin: FAN.origin,
+        }
+      : {
+          x,
+          rotate,
+          y,
+          scale,
+          opacity,
+          zIndex: isActive ? 100 : 50 - Math.round(away),
+          transformOrigin: FAN.origin,
+        }
     : undefined;
 
   return (
@@ -249,7 +275,7 @@ function ProjectCard({
       style={fanStyle}
       className={
         fan
-          ? "absolute left-1/2 top-0 -ml-[150px] w-[300px] will-change-transform"
+          ? "absolute left-1/2 top-0 -ml-[136px] w-[272px] will-change-transform"
           : "w-full"
       }
     >
@@ -286,7 +312,7 @@ function ProjectCard({
         {/* Media: a screenshot of the thing running, or three facts about it.
             Never a placeholder — a card with nothing in this slot would read
             as a missing image. */}
-        <div className="project-media relative mb-4 h-24 shrink-0 overflow-hidden rounded-2xl sm:h-28">
+        <div className="project-media relative mb-3 shrink-0 overflow-hidden rounded-2xl">
           {project.shot ? (
             <>
               <Image
@@ -421,25 +447,30 @@ export default function ProjectsFan() {
   });
   const spread = useSpring(spreadRaw, { stiffness: 90, damping: 26, restDelta: 0.001 });
 
-  // How far apart the cards sit, from the room actually available.
+  // The hand keeps one shape at every width and is scaled to the room there
+  // is. Because the pivot sits below the deck, an outer card's lean also
+  // throws it sideways — that is the swing term, and it has to be paid for or
+  // the end cards hang off the edges.
   const step = useMotionValue(FAN.stepMax);
+  const [fit, setFit] = useState(1);
   useEffect(() => {
     const el = fanRef.current;
     if (!el) return;
     const measure = () => {
-      const room = (el.clientWidth - FAN.cardWidth) / Math.max(1, projects.length - 1);
-      step.set(Math.min(FAN.stepMax, Math.max(FAN.stepMin, room)));
+      const maxAway = (projects.length - 1) / 2;
+      const swing = 0.82 * FAN.cardHeight * Math.sin((maxAway * FAN.tilt * Math.PI) / 180);
+      const wanted = maxAway * FAN.stepMax + swing + FAN.cardWidth / 2;
+      const available = el.clientWidth / 2 - 10;
+      setFit(Math.min(1, Math.max(0.58, available / wanted)));
     };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(el);
     return () => ro.disconnect();
-  }, [step]);
+  }, []);
 
   const [active, setActive] = useState<number | null>(null);
   const [playing, setPlaying] = useState<DemoVideo | null>(null);
-
-  const ghostX = useTransform(spreadRaw, [0, 1], ["-6%", "-16%"]);
 
   return (
     <section
@@ -447,14 +478,6 @@ export default function ProjectsFan() {
       ref={sectionRef}
       className="relative z-30 w-full overflow-hidden bg-white px-6 py-20 text-black md:px-12 md:py-28"
     >
-      <motion.span
-        aria-hidden
-        style={{ x: reduced ? "-10%" : ghostX }}
-        className="fx-outline pointer-events-none absolute left-0 top-1/2 -translate-y-1/2 select-none whitespace-nowrap text-[26vw] font-black uppercase leading-none tracking-tighter text-signal/15 [--fx-stroke:3px]"
-      >
-        Selected Work
-      </motion.span>
-
       <div className="relative mx-auto max-w-7xl">
         <div className="mb-10 flex flex-col items-start justify-between gap-3 md:mb-14 md:flex-row md:items-end">
           <h2 className="text-4xl font-black uppercase leading-[0.95] tracking-tighter md:text-6xl">
@@ -477,13 +500,14 @@ export default function ProjectsFan() {
             clears itself. */}
         <div
           ref={fanRef}
-          className={
-            fan
-              ? "relative mx-auto h-[600px] w-full"
-              : "mx-auto flex w-full max-w-xl flex-col gap-5"
-          }
+          style={fan ? { height: Math.round(FAN.stageHeight * fit) } : undefined}
+          className={fan ? "relative mx-auto w-full" : "mx-auto flex w-full max-w-xl flex-col gap-5"}
         >
-          {projects.map((project, index) => (
+          <div
+            style={fan ? { transform: `scale(${fit})`, transformOrigin: "50% 0%" } : undefined}
+            className={fan ? "relative h-[620px] w-full" : "contents"}
+          >
+            {projects.map((project, index) => (
             <ProjectCard
               key={project.title}
               project={project}
@@ -496,7 +520,8 @@ export default function ProjectsFan() {
               step={step}
               spread={spread}
             />
-          ))}
+            ))}
+          </div>
         </div>
       </div>
 

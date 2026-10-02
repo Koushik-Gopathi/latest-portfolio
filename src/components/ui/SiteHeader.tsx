@@ -46,15 +46,10 @@ export default function SiteHeader() {
       >
         <a
           href="#top"
-          className="group flex shrink-0 items-baseline gap-2"
+          className="shrink-0 text-sm font-black uppercase leading-none tracking-tight text-black transition-colors duration-200 hover:text-signal md:text-base"
           tabIndex={shown ? undefined : -1}
         >
-          <span className="text-base font-black uppercase leading-none tracking-tighter text-black transition-colors duration-200 group-hover:text-signal md:text-lg">
-            KG
-          </span>
-          <span className="hidden font-mono text-[0.6rem] uppercase tracking-[0.2em] text-slate sm:inline">
-            {site.meta.shortName}
-          </span>
+          {site.meta.shortName}
         </a>
 
         <div className="flex items-center gap-4 md:gap-6">
