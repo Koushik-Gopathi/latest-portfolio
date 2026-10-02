@@ -1,11 +1,21 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
-import { motion, useScroll, useTransform, useSpring, useMotionValue, type MotionValue } from "framer-motion";
+import {
+  motion,
+  AnimatePresence,
+  useScroll,
+  useTransform,
+  useSpring,
+  useMotionValue,
+  type MotionValue,
+} from "framer-motion";
 import { usePrefersReducedMotion, useMediaQuery } from "@/lib/hooks";
-import { ArrowUpRight, Lock, Play } from "lucide-react";
+import { ArrowUpRight, Lock, Play, Plus, X } from "lucide-react";
 import VideoModal, { type DemoVideo } from "@/components/ui/VideoModal";
+import { lockScroll } from "@/lib/lenis";
 import { GithubIcon } from "@/components/ui/BrandIcons";
 import { MaskText, DrawRule } from "@/components/ui/Reveal";
 
@@ -209,6 +219,157 @@ function CardLinks({ project, isActive }: { project: Project; isActive: boolean 
   );
 }
 
+/**
+ * A project opened out: the same card, full size, with the whole description
+ * instead of the two lines a fanned card has room for.
+ *
+ * Portalled to <body> like the video overlay, because the deck it is opened
+ * from is transformed, and a fixed element inside a transformed ancestor is
+ * fixed to that ancestor rather than the screen.
+ */
+function ProjectDetail({ project, onClose }: { project: Project | null; onClose: () => void }) {
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const reduced = usePrefersReducedMotion();
+
+  useEffect(() => {
+    if (!project) return;
+    const opener = document.activeElement as HTMLElement | null;
+    const unlock = lockScroll();
+    closeRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      unlock();
+      opener?.focus?.();
+    };
+  }, [project, onClose]);
+
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
+    <AnimatePresence>
+      {project && (
+        <motion.div
+          role="dialog"
+          aria-modal="true"
+          aria-label={project.title}
+          data-lenis-prevent
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: reduced ? 0 : 0.22 }}
+          onClick={onClose}
+          className="fixed inset-0 z-[100] flex items-start justify-center overflow-y-auto bg-black/80 p-4 backdrop-blur-sm md:items-center md:p-10"
+        >
+          <motion.div
+            initial={{ y: 26, scale: 0.97 }}
+            animate={{ y: 0, scale: 1 }}
+            exit={{ y: 26, scale: 0.97 }}
+            transition={reduced ? { duration: 0 } : { duration: 0.32, ease: EASE }}
+            onClick={(e) => e.stopPropagation()}
+            className="relative my-auto w-full max-w-2xl overflow-hidden rounded-3xl border border-smoke bg-white text-black shadow-2xl"
+          >
+            <button
+              ref={closeRef}
+              type="button"
+              onClick={onClose}
+              aria-label="Close"
+              className="absolute right-4 top-4 z-20 grid h-10 w-10 place-items-center rounded-full border border-white/40 bg-black/50 text-white backdrop-blur transition-colors hover:bg-white hover:text-black"
+            >
+              <X size={18} />
+            </button>
+
+            {/* The walkthrough plays in place here, rather than opening a
+                second overlay on top of this one. */}
+            {project.video ? (
+              <video
+                src={project.video.src}
+                poster={project.video.poster}
+                controls
+                playsInline
+                preload="none"
+                className="aspect-[1152/720] w-full bg-black"
+              />
+            ) : project.shot ? (
+              <Image
+                src={project.shot}
+                alt={`${project.title} interface`}
+                width={1280}
+                height={800}
+                sizes="(max-width: 768px) 92vw, 672px"
+                className="aspect-[16/10] w-full object-cover object-top"
+              />
+            ) : (
+              <div className="fx-dots flex aspect-[16/7] w-full flex-col justify-center gap-1.5 bg-signal-deep px-8 text-white">
+                {project.stats?.map((s) => (
+                  <span key={s} className="font-mono text-xs uppercase tracking-[0.2em]">
+                    {s}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div className="p-6 md:p-8">
+              <div className="mb-4 flex flex-wrap items-center gap-3">
+                <span className="rounded-full border border-smoke bg-mist px-3 py-1 font-mono text-[0.66rem] font-bold uppercase tracking-wider text-signal-ink">
+                  {project.tag}
+                </span>
+                <span className="font-mono text-[0.62rem] uppercase tracking-[0.2em] text-slate">
+                  {project.category}
+                </span>
+              </div>
+
+              <h3 className="mb-3 text-3xl font-black uppercase leading-[0.95] tracking-tighter md:text-4xl">
+                {project.title}
+              </h3>
+
+              <p className="text-sm font-medium leading-relaxed text-slate md:text-base">
+                {project.description}
+              </p>
+
+              {project.highlights && (
+                <ul className="mt-5 space-y-2 border-t border-smoke pt-5">
+                  {project.highlights.map((h) => (
+                    <li key={h} className="flex gap-2.5 text-sm leading-snug text-slate">
+                      <span aria-hidden className="text-signal">
+                        —
+                      </span>
+                      <span>{h}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {/* Stats sit under the copy here; on the card they ride the
+                  screenshot, where there is no room for words. */}
+              {project.stats && (project.shot || project.video) && (
+                <div className="mt-5 flex flex-wrap gap-x-5 gap-y-1 border-t border-smoke pt-5">
+                  {project.stats.map((st) => (
+                    <span
+                      key={st}
+                      className="font-mono text-[0.66rem] uppercase tracking-[0.18em] text-signal-ink"
+                    >
+                      {st}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <CardLinks project={project} isActive={false} />
+              </div>
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>,
+    document.body
+  );
+}
+
 function ProjectCard({
   project,
   index,
@@ -216,6 +377,7 @@ function ProjectCard({
   onEnter,
   onLeave,
   onPlay,
+  onOpen,
   fan,
   step,
   spread,
@@ -226,6 +388,7 @@ function ProjectCard({
   onEnter: () => void;
   onLeave: () => void;
   onPlay: (video: DemoVideo) => void;
+  onOpen: () => void;
   /** Fanned on a wide screen; a plain stack below that. */
   fan: boolean;
   step: MotionValue<number>;
@@ -282,6 +445,7 @@ function ProjectCard({
       <motion.div
         onPointerEnter={onEnter}
         onPointerLeave={onLeave}
+        onClick={onOpen}
         animate={{
           backgroundColor: isActive ? "#ee0000" : "#f6f0f0",
           borderColor: isActive ? "#ee0000" : "#e6dede",
@@ -305,8 +469,27 @@ function ProjectCard({
         }
         className={`project-card ${
           fan ? "project-card--fan" : "project-card--stack"
-        } group relative flex flex-col overflow-hidden rounded-3xl border p-5 sm:p-6`}
+        } group relative flex cursor-pointer flex-col overflow-hidden rounded-3xl border p-5 sm:p-6`}
       >
+        {/* Keyboard route to the same thing the click does. The card itself is
+            not a button: it already contains links, and a button cannot hold
+            links. */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpen();
+          }}
+          aria-label={`Open ${project.title}`}
+          className={`absolute right-4 top-4 z-20 grid h-7 w-7 place-items-center rounded-full border transition-colors duration-200 ${
+            isActive
+              ? "border-white/60 bg-white/15 text-white hover:bg-white hover:text-signal"
+              : "border-smoke bg-white/90 text-signal hover:bg-signal hover:text-white"
+          }`}
+        >
+          <Plus size={14} strokeWidth={2.8} />
+        </button>
+
         {/* Media: a screenshot of the thing running, or three facts about it.
             Never a placeholder — a card with nothing in this slot would read
             as a missing image. */}
@@ -334,7 +517,10 @@ function ProjectCard({
               {project.video && (
                 <button
                   type="button"
-                  onClick={() => onPlay(project.video!)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onPlay(project.video!);
+                  }}
                   aria-label={`Play ${project.video.title} (${project.video.duration})`}
                   className="group/play absolute inset-0 flex items-center justify-center bg-black/25 transition-colors duration-200 hover:bg-black/45"
                 >
@@ -412,7 +598,8 @@ function ProjectCard({
         <motion.div
           animate={{ borderColor: isActive ? "rgba(255,255,255,0.3)" : "#e6dede" }}
           transition={{ duration: 0.1, ease: "easeOut" }}
-          className="relative mt-3 flex shrink-0 flex-wrap items-center justify-between gap-2 border-t pt-3 font-mono text-xs font-bold"
+          onClick={(e) => e.stopPropagation()}
+          className="relative z-10 mt-3 flex shrink-0 flex-wrap items-center justify-between gap-2 border-t pt-3 font-mono text-xs font-bold"
         >
           <motion.span
             animate={{ color: isActive ? "#ffffff" : "#6b5f5f" }}
@@ -469,6 +656,7 @@ export default function ProjectsFan() {
 
   const [active, setActive] = useState<number | null>(null);
   const [playing, setPlaying] = useState<DemoVideo | null>(null);
+  const [opened, setOpened] = useState<Project | null>(null);
 
   return (
     <section
@@ -481,11 +669,6 @@ export default function ProjectsFan() {
           <h2 className="text-4xl font-black uppercase leading-[0.95] tracking-tighter md:text-6xl">
             <MaskText text="Designed to ship." />
           </h2>
-          <p className="flex shrink-0 items-center gap-2 font-mono text-[0.66rem] uppercase tracking-[0.25em] text-slate">
-            <span className="fx-hover-only hidden lg:inline">Hover a card to read it</span>
-            <span className="fx-touch-only">Tap a card</span>
-            <span className="text-signal">07 projects</span>
-          </p>
         </div>
 
         <DrawRule className="mb-10 bg-smoke md:mb-14" />
@@ -514,6 +697,7 @@ export default function ProjectsFan() {
               onEnter={() => setActive(index)}
               onLeave={() => setActive((c) => (c === index ? null : c))}
               onPlay={setPlaying}
+              onOpen={() => setOpened(project)}
               fan={fan}
               step={step}
               spread={spread}
@@ -523,6 +707,7 @@ export default function ProjectsFan() {
         </div>
       </div>
 
+      <ProjectDetail project={opened} onClose={() => setOpened(null)} />
       <VideoModal video={playing} onClose={() => setPlaying(null)} />
     </section>
   );

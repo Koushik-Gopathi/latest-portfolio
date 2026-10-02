@@ -97,7 +97,7 @@ export default function Education() {
             className="group inline-flex shrink-0 items-center gap-3 rounded-full bg-white px-6 py-4 font-mono text-xs font-bold uppercase tracking-[0.2em] text-signal shadow-[0_18px_44px_-22px_rgba(0,0,0,0.55)] transition-colors duration-200 hover:bg-black hover:text-white"
           >
             <Download size={15} strokeWidth={2.6} />
-            Download résumé
+            Download resume
             <span className="font-normal normal-case tracking-normal opacity-75">
               {site.resume.meta}
             </span>

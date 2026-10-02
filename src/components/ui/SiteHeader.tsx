@@ -69,7 +69,7 @@ export default function SiteHeader() {
             className="inline-flex shrink-0 items-center gap-2 rounded-full bg-signal px-3.5 py-2 font-mono text-[0.66rem] font-bold uppercase tracking-[0.16em] text-white transition-colors duration-200 hover:bg-black md:px-4"
           >
             <Download size={12} strokeWidth={2.8} />
-            Résumé
+            Resume
           </a>
         </div>
       </nav>

@@ -244,7 +244,7 @@ export default function WhoAmI() {
               className="about-resume mt-3 gap-2.5 rounded-2xl bg-signal px-5 py-3.5 font-mono text-[0.7rem] font-bold uppercase tracking-[0.18em] text-white transition-colors duration-200 hover:bg-black"
             >
               <Download size={14} strokeWidth={2.6} />
-              Résumé
+              Resume
               <span className="font-normal normal-case tracking-normal text-white/80">
                 {site.resume.meta}
               </span>

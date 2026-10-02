@@ -11,10 +11,13 @@ Two things will waste your afternoon if you do not know them:
 
 - **Check which port it actually took.** If a stale server is holding 3000,
   Next moves to 3001 without much fuss and you end up debugging an old build.
-  The startup line tells you; believe it over habit.
 - **Never run `next build` while `next dev` is running.** They share `.next`,
-  and the result is a broken mixture that looks like the stylesheet has
-  collapsed.
+  and the result is a broken mixture — missing chunks, a 500 on every request.
+  Stop the dev server, and on Windows check nothing is still listening:
+
+```bash
+npx next start -p 3000
+```
 
 ## Building
 
@@ -22,43 +25,50 @@ Two things will waste your afternoon if you do not know them:
 npm run build && npm start
 ```
 
-The whole site prerenders to static content — there is no server, no database
-and no API. First load is ~160 kB of JS.
+The whole site prerenders to static files — no server, no database, no API.
 
 ## Deploying
 
-Push to GitHub and import the repo at [vercel.com/new](https://vercel.com/new).
-Vercel detects Next.js and needs no configuration: no environment variables, no
-build settings, no secrets. Every push to `main` redeploys.
+The repo is `Koushik-Gopathi/latest-portfolio` and the Vercel project is
+`koushik-gopathi`. Pushing to `main` is the source of truth for the code.
 
-Netlify, Cloudflare Pages or any static host works equally well — `npm run
-build` and serve. Add `output: 'export'` to `next.config.mjs` if you need a
-pure static bundle with no Node runtime at all.
+If the Vercel GitHub app has access to the repo, every push to `main`
+redeploys on its own. If it does not, deploy from the command line:
+
+```bash
+npx vercel deploy --prod --yes
+```
+
+To connect pushes to deploys, install the Vercel app for this repository
+(github.com/apps/vercel), then:
+
+```bash
+npx vercel git connect https://github.com/Koushik-Gopathi/latest-portfolio
+```
 
 ### A domain
 
-Buy it wherever, then point it at the host. On Vercel that is Settings →
-Domains, and it issues the certificate itself.
+Buy it anywhere, then add it under Settings → Domains in the Vercel project;
+Vercel issues the certificate itself. The site's URL comes from
+`src/config/url.ts`, which reads Vercel's production domain at build time, so
+**redeploy once after attaching a domain** — the pages are prerendered and the
+old address is baked into them until you do.
 
-## Changing things without touching components
+## Changing content
 
 | what | where |
 |---|---|
-| every word on the site | `src/config/site.ts` |
-| every file the site loads | `src/config/assets.ts` |
-| the measured geometry | `src/config/tokens.ts` |
-
-Contact destinations, the Polaroid captions and angles, the skills list, the
-education and experience entries — all copy, all in `site.ts`. Nothing in
-`src/components` needs editing to change content.
+| Page title, description, CV path | `src/config/site.ts` |
+| Projects, links, screenshots | `src/components/work/ProjectsFan.tsx` |
+| Skills, journey, education, contact | the component for that section |
+| Colours, type, shared effects | `src/app/globals.css` |
 
 ## Utilities
 
 ```bash
 npm run shoot -- hero 1440 900 0 4200        # screenshot: name, w, h, scrollY, wait
 npm run shoot -- whole 1440 900 0 4200 full  # full page
-python tools/extract-cutout.py --preview     # rebuild the transparent portrait
 ```
 
-`tools/` is optional. `npm uninstall playwright && rm -rf tools` if you would
+`tools/` is optional — `npm uninstall playwright && rm -rf tools` if you would
 rather not carry it.
