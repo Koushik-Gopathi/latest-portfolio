@@ -1119,15 +1119,14 @@
   }
 }
 
-/* PROJECT CARDS — SIZED BY THE SCREEN THEY SIT ON
-   The rail is pinned to one screen, so a card taller than that screen loses
-   its links off the bottom. Heights live here rather than in Tailwind classes
-   because only CSS can answer to viewport HEIGHT, and a `h-*` utility in a
-   later cascade layer would beat these rules anyway. */
+/* PROJECT CARDS — TWO LAYOUTS
+   `--fan` is one card in the hand on a wide screen: portrait, fixed, all
+   seven identical so the arc reads as a deck. `--stack` is the same card
+   full width in a column, for screens too narrow to fan anything out.
+   Heights live here rather than in Tailwind classes because only CSS can
+   answer to viewport HEIGHT, and a `h-*` utility in a later cascade layer
+   would beat these rules anyway. */
 @layer components {
-  .project-card {
-    height: 440px;
-  }
   .project-desc {
     display: -webkit-box;
     -webkit-box-orient: vertical;
@@ -1135,36 +1134,37 @@
     overflow: hidden;
   }
 
-  @media (min-width: 640px) {
-    .project-card {
-      height: 470px;
-    }
+  .project-card--fan {
+    width: 300px;
+    height: 470px;
   }
-  @media (min-width: 768px) {
-    .project-card {
-      height: 510px;
+  @media (min-width: 1280px) {
+    .project-card--fan {
+      height: 486px;
     }
   }
 
-  /* A phone on its side is wide enough for the desktop type scale and far too
-     short for the card: drop the screenshot, tighten the copy, and let the
+  .project-card--stack {
+    width: 100%;
+    height: 460px;
+  }
+  @media (min-width: 640px) {
+    .project-card--stack {
+      height: 490px;
+    }
+  }
+
+  /* A phone on its side: drop the screenshot and tighten the copy so the
      title, tag and links keep their room. */
   @media (max-height: 560px) {
-    .project-card {
-      height: 70vh;
-      padding: 0.9rem 1.1rem;
+    .project-card--stack {
+      height: 76vh;
     }
     .project-media {
       display: none;
     }
     .project-desc {
       -webkit-line-clamp: 2;
-    }
-    .project-head {
-      margin-bottom: 0.75rem;
-    }
-    .project-rail {
-      margin-top: 0.75rem;
     }
   }
 }

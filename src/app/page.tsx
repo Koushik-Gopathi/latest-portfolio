@@ -3,7 +3,7 @@ import SiteHeader from "@/components/ui/SiteHeader";
 import RedLanding from "@/components/hero/RedLanding";
 import WhoAmI from "@/components/intro/WhoAmI";
 import WorkspaceShowcase from "@/components/work/WorkspaceShowcase";
-import ProjectShowcase from "@/components/work/ProjectsHorizontalScroll";
+import ProjectShowcase from "@/components/work/ProjectsFan";
 import SkillsBentoGrid from "@/components/work/SkillsBentoGrid";
 import JourneyTimeline from "@/components/journey/JourneyTimeline";
 import Education from "@/components/education/Education";
