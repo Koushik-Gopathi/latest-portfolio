@@ -1,9 +1,23 @@
 import type { Metadata, Viewport } from 'next'
+import { Instrument_Serif } from 'next/font/google'
 import { site } from '@/config/site'
 import { siteUrl } from '@/config/url'
 import SmoothScroll from '@/components/ui/SmoothScroll'
 import Cursor from '@/components/ui/Cursor'
 import './globals.css'
+
+/**
+ * The one face that is not Archivo. Used for a handful of emphasised words in
+ * the About statement — a second voice, so the page is not one shout at one
+ * size. Self-hosted by next/font at build time; no request to Google at runtime.
+ */
+const serif = Instrument_Serif({
+  subsets: ['latin'],
+  weight: '400',
+  style: ['normal', 'italic'],
+  variable: '--font-accent',
+  display: 'swap',
+})
 
 /**
  * The favicon, Apple touch icon and share image are not listed here: they are
@@ -42,7 +56,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="en" className={serif.variable}>
       <head>
         <link
           rel="preload"

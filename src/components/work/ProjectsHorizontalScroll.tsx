@@ -7,9 +7,9 @@ import {
   useScroll,
   useTransform,
   useSpring,
-  useVelocity,
   useMotionValue,
   useMotionValueEvent,
+  type MotionValue,
 } from "framer-motion";
 import { usePrefersReducedMotion } from "@/lib/hooks";
 import { ArrowUpRight, Lock, Play } from "lucide-react";
@@ -18,6 +18,8 @@ import { GithubIcon } from "@/components/ui/BrandIcons";
 import { MaskText, DrawRule } from "@/components/ui/Reveal";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
+
+const clamp = (v: number, min: number, max: number) => Math.min(Math.max(v, min), max);
 
 type Project = {
   title: string;
@@ -183,6 +185,37 @@ function CardLinks({ project, isHovered }: { project: Project; isHovered: boolea
   );
 }
 
+/**
+ * Where a card sits in the fan, as a signed distance from the middle of the
+ * screen in viewport widths: 0 dead centre, ±1 one screen away.
+ *
+ * Measured from the card's own box rather than from its index, so it stays
+ * right whatever the card widths are (the flagship is wider) and at any
+ * screen size.
+ */
+function useFanDistance(
+  ref: React.RefObject<HTMLDivElement | null>,
+  x: MotionValue<number>,
+  frameWidth: MotionValue<number>
+) {
+  const offset = useMotionValue(0);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const measure = () => offset.set(el.offsetLeft + el.offsetWidth / 2);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    if (el.parentElement) ro.observe(el.parentElement);
+    return () => ro.disconnect();
+  }, [ref, offset]);
+
+  return useTransform([x, offset, frameWidth], ([tx, o, w]: number[]) =>
+    w ? (o + tx - w / 2) / w : 0
+  );
+}
+
 function ProjectCard({
   project,
   index,
@@ -190,6 +223,8 @@ function ProjectCard({
   onEnter,
   onLeave,
   onPlay,
+  trackX,
+  frameWidth,
 }: {
   project: Project;
   index: number;
@@ -197,16 +232,38 @@ function ProjectCard({
   onEnter: () => void;
   onLeave: () => void;
   onPlay: (video: DemoVideo) => void;
+  trackX: MotionValue<number>;
+  frameWidth: MotionValue<number>;
 }) {
   const reduced = usePrefersReducedMotion();
   const wide = Boolean(project.highlights);
 
+  // The fan: cards lean away from the middle and sink slightly as they go,
+  // so the rail reads as a hand of cards with the centre one upright and
+  // full size. Hovering a card straightens it and brings it forward.
+  const ref = useRef<HTMLDivElement>(null);
+  const d = useFanDistance(ref, trackX, frameWidth);
+  const spring = { stiffness: 120, damping: 24, mass: 0.6 };
+  const rotate = useSpring(useTransform(d, (v) => (isHovered ? 0 : clamp(v, -1.4, 1.4) * 7)), spring);
+  const scale = useSpring(
+    useTransform(d, (v) => (isHovered ? 1 : 1 - Math.min(Math.abs(v), 1) * 0.1)),
+    spring
+  );
+  const lift = useSpring(
+    useTransform(d, (v) => (isHovered ? 0 : Math.min(Math.abs(v), 1) * 30)),
+    spring
+  );
+  // Nearest the middle paints on top, so neighbours tuck behind it.
+  const zIndex = useTransform(d, (v) => Math.round(50 - Math.abs(v) * 20));
+
   return (
     <motion.div
+      ref={ref}
       initial={{ opacity: 0, y: 46 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={reduced ? { duration: 0 } : { duration: 0.7, delay: index * 0.06, ease: EASE }}
+      style={reduced ? undefined : { rotate, scale, y: lift, zIndex, transformOrigin: "50% 120%" }}
       className="shrink-0"
     >
       <motion.div
@@ -370,25 +427,25 @@ export default function ProjectsHorizontalScroll() {
   // last card off-screen on phones. Re-measured whenever either box resizes.
   const trackRef = useRef<HTMLDivElement>(null);
   const maxShift = useMotionValue(0);
+  // The cards need the frame's width too, to know how far they are from its
+  // middle.
+  const frameWidth = useMotionValue(0);
   useEffect(() => {
     const track = trackRef.current;
     const frame = track?.parentElement;
     if (!track || !frame) return;
-    const measure = () => maxShift.set(Math.max(0, track.offsetWidth - frame.clientWidth));
+    const measure = () => {
+      maxShift.set(Math.max(0, track.offsetWidth - frame.clientWidth));
+      frameWidth.set(frame.clientWidth);
+    };
     measure();
     const ro = new ResizeObserver(measure);
     ro.observe(track);
     ro.observe(frame);
     return () => ro.disconnect();
-  }, [maxShift]);
+  }, [maxShift, frameWidth]);
   // Both inputs listed explicitly, so the rail re-resolves when EITHER moves.
   const x = useTransform([scrollYProgress, maxShift], ([p, m]: number[]) => -p * m);
-
-  // The track leans into the scroll. Velocity is springed first, so the lean
-  // builds and releases instead of snapping on every wheel tick.
-  const scrollVelocity = useVelocity(scrollYProgress);
-  const smoothVelocity = useSpring(scrollVelocity, { damping: 40, stiffness: 320 });
-  const skew = useTransform(smoothVelocity, [-2.5, 0, 2.5], [2.5, 0, -2.5], { clamp: true });
 
   const railScale = useSpring(scrollYProgress, { stiffness: 140, damping: 28 });
   const ghostX = useTransform(scrollYProgress, [0, 1], ["0%", "-40%"]);
@@ -429,8 +486,10 @@ export default function ProjectsHorizontalScroll() {
         <div className="relative flex w-full overflow-hidden">
           <motion.div
             ref={trackRef}
-            style={reduced ? { x } : { x, skewX: skew }}
-            className="flex w-max gap-4 px-6 md:gap-6 md:px-12"
+            style={{ x }}
+            // Cards overlap a little, so the fan closes into a deck rather
+            // than sitting as a row of separate tiles.
+            className="flex w-max items-end gap-4 px-6 md:-space-x-6 md:gap-6 md:px-12"
           >
             {projects.map((project, index) => (
               <ProjectCard
@@ -441,6 +500,8 @@ export default function ProjectsHorizontalScroll() {
                 onEnter={() => setHoveredIndex(index)}
                 onLeave={() => setHoveredIndex((c) => (c === index ? null : c))}
                 onPlay={setPlaying}
+                trackX={x}
+                frameWidth={frameWidth}
               />
             ))}
           </motion.div>

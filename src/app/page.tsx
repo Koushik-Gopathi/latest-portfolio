@@ -1,4 +1,5 @@
 import ScrollProgress from "@/components/ui/ScrollProgress";
+import SiteHeader from "@/components/ui/SiteHeader";
 import RedLanding from "@/components/hero/RedLanding";
 import WhoAmI from "@/components/intro/WhoAmI";
 import WorkspaceShowcase from "@/components/work/WorkspaceShowcase";
@@ -12,8 +13,9 @@ export default function Home() {
   return (
     // SmoothScroll lives in the root layout, not here: two Lenis instances
     // both rafing the same document fight each other and the scroll goes soft.
-    <main className="min-h-screen bg-white text-black">
+    <main id="top" className="min-h-screen bg-white text-black">
       <ScrollProgress />
+      <SiteHeader />
       <RedLanding />
       <WhoAmI />
       <WorkspaceShowcase />

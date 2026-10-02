@@ -155,7 +155,7 @@ function FooterMarquee() {
 
 export default function ContactMe() {
   return (
-    <section className="relative w-full overflow-hidden bg-white px-6 pb-0 pt-20 text-black md:px-12 md:pt-32">
+    <section id="contact" className="relative w-full overflow-hidden bg-white px-6 pb-0 pt-20 text-black md:px-12 md:pt-32">
       <FloatingDots />
 
       <div className="relative z-10 max-w-3xl mx-auto text-center">

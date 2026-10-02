@@ -65,6 +65,8 @@
   --font-display: 'Archivo', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --font-body: 'Archivo', 'Helvetica Neue', Helvetica, Arial, sans-serif;
   --font-hand: 'Hand', 'Segoe Print', 'Bradley Hand', cursive;
+  /* Supplied by next/font in the root layout. */
+  --font-accent: var(--font-accent), 'Times New Roman', serif;
 }
 
 :root {
@@ -1008,6 +1010,23 @@
     font-size: clamp(2.5rem, min(15vw, 13vh), 8rem);
   }
 
+  /* The pinned shell's own spacing, so a screen-height query can shrink it;
+     Tailwind's gap/padding utilities sit in a later layer and would win. */
+  .about-shell {
+    gap: 1.5rem;
+    padding-top: 1.5rem;
+    padding-bottom: 1.5rem;
+  }
+  @media (min-width: 768px) {
+    .about-shell {
+      gap: 2.5rem;
+    }
+  }
+
+  .about-statement {
+    font-size: clamp(1.05rem, min(3.6vw, 3.1vh), 1.95rem);
+  }
+
   .about-bio {
     font-size: 0.95rem;
     line-height: 1.6;
@@ -1028,6 +1047,13 @@
      touch screen; the pair below swaps it for "Tap to open" by capability
      rather than by screen width, since a small laptop has a mouse and a big
      tablet does not. */
+  /* The header is fixed, so a jump to a section must stop short of it. */
+  #work,
+  #education,
+  #contact {
+    scroll-margin-top: 76px;
+  }
+
   .fx-touch-only {
     display: none;
   }
@@ -1049,12 +1075,39 @@
     gap: 0.75rem;
   }
 
-  /* A small phone (320x568) or a phone on its side: tighter bio. Measured to
-     fit with the cards still showing. */
-  @media (max-height: 600px) {
+  /* The About block is pinned to one screen, and the statement added height
+     to it. Below roughly 620px of screen the long paragraph is dropped and
+     the statement carries the section on its own — it says the same thing in
+     one line. The full text stays in the page for screen readers. */
+  @media (max-height: 620px) {
     .about-bio {
-      font-size: 0.82rem;
-      line-height: 1.5;
+      display: none;
+    }
+    .about-statement {
+      margin-bottom: 0;
+      /* Height matters as much as width here: a phone on its side is wide
+         and tiny, so sizing on vw alone set this far too large. */
+      font-size: clamp(0.95rem, min(4.4vw, 3.4vh), 1.35rem);
+    }
+    .about-shell {
+      gap: 0.75rem;
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+    }
+  }
+
+  /* A phone on its side: the header already carries a Résumé button, so the
+     one in this block is a duplicate worth its height. */
+  /* Display declared here, not as a Tailwind utility, so the query below can
+     actually turn it off — a utility would outrank this rule. */
+  .about-resume {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  @media (max-height: 430px) {
+    .about-resume {
+      display: none;
     }
   }
 

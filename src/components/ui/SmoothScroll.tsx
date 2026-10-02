@@ -47,7 +47,8 @@ export default function SmoothScroll() {
       const target = document.querySelector(hash)
       if (!target) return
       e.preventDefault()
-      lenis.scrollTo(target as HTMLElement, { duration: 1.6 })
+      // Stop short of the fixed header rather than under it.
+      lenis.scrollTo(target as HTMLElement, { duration: 1.6, offset: -76 })
       history.pushState(null, '', hash)
     }
     document.addEventListener('click', onClick)

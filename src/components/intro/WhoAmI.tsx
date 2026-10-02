@@ -44,8 +44,21 @@ export default function WhoAmI() {
   const contentOpacity = useTransform(scrollY, [850, 1300], [0, 1]);
   const contentY = useTransform(scrollY, [850, 1300], [30, 0]);
 
-  const shortBio =
-    "I'm a B.Tech Cybersecurity student with a strong pull toward building things, not just securing them. My focus right now spans web development, app development, and web design — crafting full-stack applications that scale, building cross-platform mobile experiences, and designing interfaces that feel as intentional as the code behind them. I'm driven by curiosity for how technology works under the hood, and I'm always looking for the next problem worth solving.";
+  /**
+   * The opening sentence is set as a statement rather than buried in the
+   * paragraph: big, and with the three words that matter in the accent serif.
+   * Everything after it still types itself out underneath.
+   */
+  const statement = {
+    before: "I'm a B.Tech Cybersecurity student with a strong pull toward ",
+    accent: "building things",
+    after: ", not just securing them.",
+  };
+
+  const restOfBio =
+    "My focus right now spans web development, app development, and web design — crafting full-stack applications that scale, building cross-platform mobile experiences, and designing interfaces that feel as intentional as the code behind them. I'm driven by curiosity for how technology works under the hood, and I'm always looking for the next problem worth solving.";
+
+  const shortBio = statement.before + statement.accent + statement.after + " " + restOfBio;
 
   const [typedBio, setTypedBio] = useState("");
   const [typingDone, setTypingDone] = useState(false);
@@ -75,7 +88,7 @@ export default function WhoAmI() {
    */
   useEffect(() => {
     if (reduced) {
-      setTypedBio(shortBio);
+      setTypedBio(restOfBio);
       setTypingDone(true);
       return;
     }
@@ -88,11 +101,11 @@ export default function WhoAmI() {
       let i = 0;
       typingTimerRef.current = setInterval(() => {
         i += STEP;
-        if (i < shortBio.length) {
-          setTypedBio(shortBio.slice(0, i));
+        if (i < restOfBio.length) {
+          setTypedBio(restOfBio.slice(0, i));
         } else {
           if (typingTimerRef.current) clearInterval(typingTimerRef.current);
-          setTypedBio(shortBio);
+          setTypedBio(restOfBio);
           setTypingDone(true);
         }
       }, 13);
@@ -102,7 +115,7 @@ export default function WhoAmI() {
     return contentOpacity.on("change", (latest) => {
       if (latest > 0.5) start();
     });
-  }, [contentOpacity, shortBio, reduced]);
+  }, [contentOpacity, restOfBio, reduced]);
 
   useEffect(
     () => () => {
@@ -113,7 +126,7 @@ export default function WhoAmI() {
 
   return (
     <div className="relative z-0 h-[max(280vh,2600px)] w-full bg-white text-black">
-      <div className="sticky top-0 flex h-screen w-full flex-col items-center justify-center gap-6 overflow-hidden px-4 py-6 md:gap-10 md:px-10">
+      <div className="about-shell sticky top-0 flex h-screen w-full flex-col items-center justify-center overflow-hidden px-4 md:px-10">
         {/* Ambient red wash behind everything, drifting against the heading. */}
         <motion.div
           aria-hidden
@@ -156,20 +169,31 @@ export default function WhoAmI() {
               the last character, because a typewriter that loses its cursor
               the instant it finishes stops reading as one. */}
           <div className="text-left">
-            <p className="about-bio relative font-medium text-black">
-              <span className="sr-only">{shortBio}</span>
+            <p className="sr-only">{shortBio}</p>
 
+            {/* The statement. Two faces in one sentence, which is the whole
+                point: the accent words carry the emphasis instead of every
+                heading on the page shouting at the same size. */}
+            <p aria-hidden className="about-statement mb-5 font-black uppercase leading-[1.03] tracking-tight text-black">
+              {statement.before}
+              <span className="font-normal normal-case italic tracking-normal text-signal [font-family:var(--font-accent)]">
+                {statement.accent}
+              </span>
+              {statement.after}
+            </p>
+
+            <p className="about-bio relative font-medium text-black">
               {/* An invisible copy of the finished paragraph holds its exact
                   final height from the first frame, at any width, so the
                   centred block does not creep upward as the text grows. */}
               <span aria-hidden className="invisible">
-                {shortBio}
+                {restOfBio}
                 <span className="ml-0.5 inline-block w-[0.5ch]" />
               </span>
 
               <span aria-hidden className="absolute inset-0">
                 {typingDone
-                  ? shortBio.split(" ").map((word, i) => (
+                  ? restOfBio.split(" ").map((word, i) => (
                       <span key={i}>
                         <GlitchText text={word} className="transition-colors duration-200 hover:text-signal" />{" "}
                       </span>
@@ -217,7 +241,7 @@ export default function WhoAmI() {
               viewport={{ once: true, amount: 0.5 }}
               transition={reduced ? { duration: 0 } : { duration: 0.6, delay: 0.12, ease: EASE }}
               whileHover={{ y: -2 }}
-              className="mt-3 inline-flex items-center justify-center gap-2.5 rounded-2xl bg-signal px-5 py-3.5 font-mono text-[0.7rem] font-bold uppercase tracking-[0.18em] text-white transition-colors duration-200 hover:bg-black"
+              className="about-resume mt-3 gap-2.5 rounded-2xl bg-signal px-5 py-3.5 font-mono text-[0.7rem] font-bold uppercase tracking-[0.18em] text-white transition-colors duration-200 hover:bg-black"
             >
               <Download size={14} strokeWidth={2.6} />
               Résumé
