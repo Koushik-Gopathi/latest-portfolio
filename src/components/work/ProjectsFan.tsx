@@ -285,10 +285,9 @@ function ProjectCard({
         animate={{
           backgroundColor: isActive ? "#ee0000" : "#f6f0f0",
           borderColor: isActive ? "#ee0000" : "#e6dede",
-          // Pulling a card out of the fan straightens it and lifts it clear.
-          rotate: fan && isActive ? -tilt : 0,
-          scale: fan && isActive ? 1.07 : 1,
-          y: isActive ? (fan ? -26 : -10) : 0,
+          // Pulled forward, not straightened: the lean is the whole look.
+          scale: fan && isActive ? 1.09 : 1,
+          y: isActive ? (fan ? -30 : -10) : 0,
           boxShadow: isActive
             ? "0 36px 80px -28px rgba(238,0,0,0.55)"
             : "0 12px 30px -18px rgba(0,0,0,0.35)",
@@ -299,7 +298,6 @@ function ProjectCard({
             : {
                 duration: 0.1,
                 ease: "easeOut",
-                rotate: { duration: 0.4, ease: EASE },
                 scale: { duration: 0.4, ease: EASE },
                 y: { duration: 0.4, ease: EASE },
                 boxShadow: { duration: 0.35, ease: EASE },
