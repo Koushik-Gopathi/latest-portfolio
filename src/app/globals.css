@@ -138,46 +138,6 @@
     overflow: hidden;
   }
 
-  /* ===========================================================================
-     CURSOR
-     A 9px dot that lags the pointer and opens into a ring over anything
-     clickable. Never on touch, never under reduced motion — a trailing element
-     is precisely what that setting asks you to remove. Near-black rather than
-     inverted: differencing white against the red came back cyan.
-     =========================================================================== */
-  html.custom-cursor,
-  html.custom-cursor * {
-    cursor: none !important;
-  }
-
-  .cursor-dot {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 90;
-    width: 9px;
-    height: 9px;
-    border-radius: 50%;
-    background: #1f0000;
-    border: 1px solid transparent;
-    pointer-events: none;
-    opacity: 0;
-    transition:
-      width 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-      height 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-      background-color 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-      border-color 0.28s cubic-bezier(0.16, 1, 0.3, 1),
-      opacity 0.2s linear;
-  }
-  .cursor-dot[data-on='true'] {
-    opacity: 1;
-  }
-  .cursor-dot[data-hover='true'] {
-    width: 30px;
-    height: 30px;
-    background: transparent;
-    border-color: #1f0000;
-  }
 }
 
 /* ===========================================================================
@@ -289,17 +249,6 @@
   .fx-outline {
     -webkit-text-fill-color: transparent;
     -webkit-text-stroke: var(--fx-stroke, 1.5px) currentColor;
-  }
-
-  /* The cursor stays one near-black dot on every surface. Inverting it with
-     `mix-blend-mode: difference` was tried and reverted: differencing white
-     against #ff0000 comes back cyan, which put a stray teal dot on every red
-     section. Dark reads on both the white pages and the red ones. */
-  .cursor-dot {
-    background: #1f0000;
-  }
-  .cursor-dot[data-hover='true'] {
-    border-color: #1f0000;
   }
 
   @media (prefers-reduced-motion: reduce) {

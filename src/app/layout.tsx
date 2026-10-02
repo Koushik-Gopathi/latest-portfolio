@@ -3,7 +3,6 @@ import { Instrument_Serif } from 'next/font/google'
 import { site } from '@/config/site'
 import { siteUrl } from '@/config/url'
 import SmoothScroll from '@/components/ui/SmoothScroll'
-import Cursor from '@/components/ui/Cursor'
 import './globals.css'
 
 /**
@@ -68,7 +67,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body>
         <SmoothScroll />
-        <Cursor />
         <a
           href="#work"
           className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:bg-ink focus:px-4 focus:py-2 focus:text-paper"
